@@ -1,0 +1,87 @@
+# .gitignore for Project Root (backend + frontend)
+
+# Node modules (for frontend)
+frontend/node_modules/
+frontend/.pnp/
+frontend/.pnp.js
+
+# Build outputs (for frontend)
+frontend/build/
+frontend/dist/
+
+# Dependency directories (for frontend)
+frontend/package-lock.json
+frontend/yarn.lock
+
+# Logs
+*.log
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# .env files (for sensitive information)
+*.env
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Backend files
+
+# Python bytecode
+*__pycache__
+*.pyc
+*.pyo
+
+# Virtual environment (backend)
+backend/venv/
+backend/.env/
+backend/.venv/
+
+# Database files
+backend/*.sqlite
+backend/*.db
+
+# Migration folders (for alembic or other migration tools)
+backend/migrations/
+
+# Coverage reports
+backend/.coverage
+backend/.hypothesis/
+backend/.pytest_cache/
+backend/.tox/
+backend/.nox/
+
+# Backup files
+*.bak
+*.swp
+
+# Miscellaneous
+backend/instance/
+backend/.pytest_cache/
+backend/tests/.coverage
+
+# Ignore VS Code settings (if not relevant for version control)
+.vscode/
+
+# Frontend specific: build/ folder, dependency lock files, environment files
+frontend/build/
+frontend/dist/
+frontend/.env.*
+frontend/package-lock.json
+frontend/yarn.lock
+
+# React build files
+frontend/build/
+
+# Ignore test coverage files
+frontend/coverage/
