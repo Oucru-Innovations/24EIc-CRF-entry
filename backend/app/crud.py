@@ -1,175 +1,177 @@
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 from backend.app.models import Patient, PatientDayRecord, PossibleReason, Event
-from backend.app.schemas import PatientCreate, Patient, PatientDayRecordCreate, PatientDayRecord, PossibleReasonCreate, EventCreate
-from backend.app.models import GenderEnum
 
 # --- Patient CRUD Operations ---
 
-# Create a new Patient
-def create_patient(db: Session, patient: PatientCreate):
-    db_patient = Patient(
-        study_code=patient.study_code,
-        abbreviation_name=patient.abbreviation_name,
-        year_of_birth=patient.year_of_birth,
-        gender=patient.gender
-    )
-    db.add(db_patient)
+def create_patient(db: Session, patient: Patient):
+    db.add(patient)
     db.commit()
-    db.refresh(db_patient)
-    return db_patient
+    db.refresh(patient)
+    return patient
 
-# Get all Patients
 def get_patients(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(Patient).offset(skip).limit(limit).all()
+    statement = select(Patient).offset(skip).limit(limit)
+    return db.exec(statement).all()
 
-# Get a single Patient by ID
 def get_patient_by_id(db: Session, patient_id: int):
-    return db.query(Patient).filter(Patient.id == patient_id).first()
+    return db.get(Patient, patient_id)
+
+def update_patient(db: Session, patient_id: int, patient: Patient):
+    # Fetch the existing patient
+    existing_patient = db.get(Patient, patient_id)
+    if not existing_patient:
+        return None
+
+    # Update fields
+    existing_patient.study_code = patient.study_code
+    existing_patient.abbreviation_name = patient.abbreviation_name
+    existing_patient.year_of_birth = patient.year_of_birth
+    existing_patient.gender = patient.gender
+
+    # Commit changes to the database
+    db.add(existing_patient)
+    db.commit()
+    db.refresh(existing_patient)
+
+    return existing_patient
+
+def delete_patient(db: Session, patient_id: int):
+    # Fetch the patient
+    patient = db.get(Patient, patient_id)
+    if not patient:
+        return None
+
+    # Delete all associated day records
+    statement = select(PatientDayRecord).where(PatientDayRecord.patient_id == patient_id)
+    day_records = db.exec(statement).all()
+    for record in day_records:
+        db.delete(record)
+
+    # Delete the patient
+    db.delete(patient)
+    db.commit()
+    return patient
 
 # --- PatientDayRecord CRUD Operations ---
 
 # Create a new PatientDayRecord
-def create_patient_day_record(db: Session, patient_day_record: PatientDayRecordCreate):
-    db_patient_day_record = PatientDayRecord(
-        patient_id=patient_day_record.patient_id,
-        date_of_alert=patient_day_record.date_of_alert,
-        time_of_alert=patient_day_record.time_of_alert,
-        date_of_assessment=patient_day_record.date_of_assessment,
-        time_of_assessment=patient_day_record.time_of_assessment,
-        possible_reason_id=patient_day_record.possible_reason_of_alert,
-        new_information=patient_day_record.new_information,
-        expected_alert=patient_day_record.expected_alert,
-        event_at_alert_id=patient_day_record.event_at_alert,
-        event_during_24_hours=patient_day_record.event_during_24_hours
-    )
-    db.add(db_patient_day_record)
+def create_patient_day_record(db: Session, record: PatientDayRecord):
+    db.add(record)
     db.commit()
-    db.refresh(db_patient_day_record)
-    return db_patient_day_record
+    db.refresh(record)
+    return record
 
 # Get all PatientDayRecords for a specific patient
 def get_patient_day_records(db: Session, patient_id: int, skip: int = 0, limit: int = 100):
-    return db.query(PatientDayRecord).filter(PatientDayRecord.patient_id == patient_id).offset(skip).limit(limit).all()
+    statement = select(PatientDayRecord).where(PatientDayRecord.patient_id == patient_id).offset(skip).limit(limit)
+    return db.exec(statement).all()
 
 # Get a single PatientDayRecord by ID
-def get_patient_day_record_by_id(db: Session, patient_day_record_id: int):
-    return db.query(PatientDayRecord).filter(PatientDayRecord.id == patient_day_record_id).first()
+def get_patient_day_record_by_id(db: Session, record_id: int):
+    return db.get(PatientDayRecord, record_id)
 
-# --- PossibleReason CRUD Operations ---
+# Update an existing PatientDayRecord
+def update_patient_day_record(db: Session, record_id: int, updated_record: PatientDayRecord):
+    # Fetch the existing record
+    record = db.get(PatientDayRecord, record_id)
+    if not record:
+        return None
 
-# Create a new PossibleReason
-def create_possible_reason(db: Session, reason: PossibleReasonCreate):
-    db_reason = PossibleReason(reason=reason.reason)
-    db.add(db_reason)
+    # Update fields
+    for field, value in updated_record.dict(exclude_unset=True).items():
+        setattr(record, field, value)
+
+    db.add(record)
     db.commit()
-    db.refresh(db_reason)
-    return db_reason
-
-# Get all PossibleReasons
-def get_possible_reasons(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(PossibleReason).offset(skip).limit(limit).all()
-
-# Get a single PossibleReason by ID
-def get_possible_reason_by_id(db: Session, reason_id: int):
-    return db.query(PossibleReason).filter(PossibleReason.id == reason_id).first()
-
-# --- Event CRUD Operations ---
-
-# Create a new Event
-def create_event(db: Session, event: EventCreate):
-    db_event = Event(event=event.event)
-    db.add(db_event)
-    db.commit()
-    db.refresh(db_event)
-    return db_event
-
-# Get all Events
-def get_events(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(Event).offset(skip).limit(limit).all()
-
-# Get a single Event by ID
-def get_event_by_id(db: Session, event_id: int):
-    return db.query(Event).filter(Event.id == event_id).first()
-
-# --- Update CRUD Operations ---
-
-# Update a Patient
-def update_patient(db: Session, patient_id: int, patient: PatientCreate):
-    db_patient = db.query(Patient).filter(Patient.id == patient_id).first()
-    if db_patient:
-        db_patient.study_code = patient.study_code
-        db_patient.abbreviation_name = patient.abbreviation_name
-        db_patient.year_of_birth = patient.year_of_birth
-        db_patient.gender = patient.gender
-        db.commit()
-        db.refresh(db_patient)
-    return db_patient
-
-# Update a PatientDayRecord
-def update_patient_day_record(db: Session, record_id: int, patient_day_record: PatientDayRecordCreate):
-    db_patient_day_record = db.query(PatientDayRecord).filter(PatientDayRecord.id == record_id).first()
-    if db_patient_day_record:
-        db_patient_day_record.date_of_alert = patient_day_record.date_of_alert
-        db_patient_day_record.time_of_alert = patient_day_record.time_of_alert
-        db_patient_day_record.date_of_assessment = patient_day_record.date_of_assessment
-        db_patient_day_record.time_of_assessment = patient_day_record.time_of_assessment
-        db_patient_day_record.possible_reason_id = patient_day_record.possible_reason_of_alert
-        db_patient_day_record.new_information = patient_day_record.new_information
-        db_patient_day_record.expected_alert = patient_day_record.expected_alert
-        db_patient_day_record.event_at_alert_id = patient_day_record.event_at_alert
-        db_patient_day_record.event_during_24_hours = patient_day_record.event_during_24_hours
-        db.commit()
-        db.refresh(db_patient_day_record)
-    return db_patient_day_record
-
-# Update a PossibleReason
-def update_possible_reason(db: Session, reason_id: int, reason: PossibleReasonCreate):
-    db_reason = db.query(PossibleReason).filter(PossibleReason.id == reason_id).first()
-    if db_reason:
-        db_reason.reason = reason.reason
-        db.commit()
-        db.refresh(db_reason)
-    return db_reason
-
-# Update an Event
-def update_event(db: Session, event_id: int, event: EventCreate):
-    db_event = db.query(Event).filter(Event.id == event_id).first()
-    if db_event:
-        db_event.event = event.event
-        db.commit()
-        db.refresh(db_event)
-    return db_event
-
-# --- Delete CRUD Operations ---
-
-# Delete a Patient
-def delete_patient(db: Session, patient_id: int):
-    db_patient = db.query(Patient).filter(Patient.id == patient_id).first()
-    if db_patient:
-        db.delete(db_patient)
-        db.commit()
-    return db_patient
+    db.refresh(record)
+    return record
 
 # Delete a PatientDayRecord
 def delete_patient_day_record(db: Session, record_id: int):
-    db_patient_day_record = db.query(PatientDayRecord).filter(PatientDayRecord.id == record_id).first()
-    if db_patient_day_record:
-        db.delete(db_patient_day_record)
-        db.commit()
-    return db_patient_day_record
+    # Fetch the record
+    record = db.get(PatientDayRecord, record_id)
+    if not record:
+        return None
+
+    db.delete(record)
+    db.commit()
+    return record
+
+
+# --- PossibleReason CRUD Operations ---
+
+# Create a PossibleReason
+def create_possible_reason(db: Session, reason: PossibleReason):
+    db.add(reason)
+    db.commit()
+    db.refresh(reason)
+    return reason
+
+# Get all PossibleReasons
+def get_possible_reasons(db: Session, skip: int = 0, limit: int = 100):
+    statement = select(PossibleReason).offset(skip).limit(limit)
+    return db.exec(statement).all()
+
+# Get a single PossibleReason by ID
+def get_possible_reason_by_id(db: Session, reason_id: int):
+    return db.get(PossibleReason, reason_id)
+
+# Update a PossibleReason
+def update_possible_reason(db: Session, reason_id: int, updated_reason: PossibleReason):
+    reason = db.get(PossibleReason, reason_id)
+    if not reason:
+        return None
+    for field, value in updated_reason.dict(exclude_unset=True).items():
+        setattr(reason, field, value)
+    db.add(reason)
+    db.commit()
+    db.refresh(reason)
+    return reason
 
 # Delete a PossibleReason
 def delete_possible_reason(db: Session, reason_id: int):
-    db_reason = db.query(PossibleReason).filter(PossibleReason.id == reason_id).first()
-    if db_reason:
-        db.delete(db_reason)
-        db.commit()
-    return db_reason
+    reason = db.get(PossibleReason, reason_id)
+    if not reason:
+        return None
+    db.delete(reason)
+    db.commit()
+    return reason
+
+# --- Event CRUD Operations ---
+
+# Create an Event
+def create_event(db: Session, event: Event):
+    db.add(event)
+    db.commit()
+    db.refresh(event)
+    return event
+
+# Get all Events
+def get_events(db: Session, skip: int = 0, limit: int = 100):
+    statement = select(Event).offset(skip).limit(limit)
+    return db.exec(statement).all()
+
+# Get a single Event by ID
+def get_event_by_id(db: Session, event_id: int):
+    return db.get(Event, event_id)
+
+# Update an Event
+def update_event(db: Session, event_id: int, updated_event: Event):
+    event = db.get(Event, event_id)
+    if not event:
+        return None
+    for field, value in updated_event.dict(exclude_unset=True).items():
+        setattr(event, field, value)
+    db.add(event)
+    db.commit()
+    db.refresh(event)
+    return event
 
 # Delete an Event
 def delete_event(db: Session, event_id: int):
-    db_event = db.query(Event).filter(Event.id == event_id).first()
-    if db_event:
-        db.delete(db_event)
-        db.commit()
-    return db_event
+    event = db.get(Event, event_id)
+    if not event:
+        return None
+    db.delete(event)
+    db.commit()
+    return event

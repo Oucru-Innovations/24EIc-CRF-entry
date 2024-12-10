@@ -1,56 +1,55 @@
-from sqlalchemy import Column, Integer, String, Date, Time, ForeignKey, Enum
-from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import ENUM
-from backend.app.database import Base
-import enum
+from sqlmodel import SQLModel, Field, Relationship
+from typing import Optional, List
+from enum import Enum
 
 # Gender Enum (Only Male and Female)
-class GenderEnum(str, enum.Enum):
+class GenderEnum(str, Enum):
     male = "Male"
     female = "Female"
 
 # Patient model
-class Patient(Base):
-    __tablename__ = 'patients'
+class Patient(SQLModel, table=True):
+    __tablename__ = "patients"  # Explicitly set table name
 
-    id = Column(Integer, primary_key=True, index=True)
-    study_code = Column(String, unique=True, index=True, nullable=False)
-    abbreviation_name = Column(String, nullable=False)
-    year_of_birth = Column(Integer, nullable=False)
-    gender = Column(Enum(GenderEnum), nullable=False)  # Use Enum here for gender
+    id: Optional[int] = Field(default=None, primary_key=True)
+    study_code: str = Field(index=True, unique=True)
+    abbreviation_name: str
+    year_of_birth: int
+    gender: GenderEnum
 
-    day_records = relationship("PatientDayRecord", back_populates="patient")
+    # Relationship to PatientDayRecord
+    day_records: List["PatientDayRecord"] = Relationship(back_populates="patient")
 
 # PossibleReason model
-class PossibleReason(Base):
-    __tablename__ = 'possible_reasons'
+class PossibleReason(SQLModel, table=True):
+    __tablename__ = "possible_reasons"  # Explicitly set table name
 
-    id = Column(Integer, primary_key=True, index=True)
-    reason = Column(String, unique=True, nullable=False)
+    id: Optional[int] = Field(default=None, primary_key=True)
+    reason: str = Field(unique=True)
 
 # Event model
-class Event(Base):
-    __tablename__ = 'events'
+class Event(SQLModel, table=True):
+    __tablename__ = "events"  # Explicitly set table name
 
-    id = Column(Integer, primary_key=True, index=True)
-    event = Column(String, unique=True, nullable=False)
+    id: Optional[int] = Field(default=None, primary_key=True)
+    event: str = Field(unique=True)
 
 # PatientDayRecord model
-class PatientDayRecord(Base):
-    __tablename__ = 'patient_day_records'
+class PatientDayRecord(SQLModel, table=True):
+    __tablename__ = "patient_day_records"  # Explicitly set table name
 
-    id = Column(Integer, primary_key=True, index=True)
-    patient_id = Column(Integer, ForeignKey('patients.id'), nullable=False)
-    date_of_alert = Column(Date, nullable=False)
-    time_of_alert = Column(Time, nullable=False)
-    date_of_assessment = Column(Date, nullable=False)
-    time_of_assessment = Column(Time, nullable=False)
-    possible_reason_id = Column(Integer, ForeignKey('possible_reasons.id'), nullable=False)
-    new_information = Column(Integer, nullable=False)  # Scale 0-7
-    expected_alert = Column(Integer, nullable=False)   # Scale 0-7
-    event_at_alert_id = Column(Integer, ForeignKey('events.id'), nullable=False)
-    event_during_24_hours = Column(String, nullable=True)  # Store multiple choices as comma-separated values
+    id: Optional[int] = Field(default=None, primary_key=True)
+    patient_id: int = Field(foreign_key="patients.id")  # Reference to patients table
+    date_of_alert: str
+    time_of_alert: str
+    date_of_assessment: str
+    time_of_assessment: str
+    possible_reason_id: int = Field(foreign_key="possible_reasons.id")  # Reference to possible_reasons table
+    new_information: int  # Scale 0-7
+    expected_alert: int  # Scale 0-7
+    event_at_alert_id: int = Field(foreign_key="events.id")  # Reference to events table
+    event_during_24_hours: Optional[str]  # Comma-separated values
 
-    patient = relationship("Patient", back_populates="day_records")
-    possible_reason = relationship("PossibleReason")
-    event_at_alert = relationship("Event")
+    patient: Patient = Relationship(back_populates="day_records")
+    possible_reason: PossibleReason = Relationship()
+    event_at_alert: Event = Relationship()

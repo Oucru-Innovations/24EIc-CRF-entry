@@ -1,34 +1,67 @@
-import React from 'react';
-import './App.css'; // Custom styles
-import { Route, Routes } from 'react-router-dom'; // Import routes for navigation
-import HomePage from './pages/HomePage'; // Import HomePage component
-import PatientPage from './pages/PatientPage'; // Import PatientPage component
-import PatientForm from './components/PatientForm'; // Import PatientForm component
-import DayRecordForm from './components/DayRecordForm'; // Import DayRecordForm component
+import React, { useState } from 'react';
+import './App.css';
+import { Route, Routes } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import PatientPage from './pages/PatientPage';
+import PatientForm from './components/PatientForm';
+import DayRecordForm from './components/DayRecordForm';
+import AdminPage from './pages/AdminPage';
+import Header from './components/Header';
+import Sidebar from './components/Sidebar';
 
 function App() {
+  const [patients, setPatients] = useState([]);
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
+
+  const handleSavePatient = (newPatient) => {
+    setPatients((prevPatients) => [...prevPatients, newPatient]);
+    console.log('Patient saved successfully:', newPatient);
+  };
+
   return (
-    <div className="App">
-      <h1>Patient Management System</h1>
-      <Routes>
-        {/* Define route for home page */}
-        <Route path="/" element={<HomePage />} />
-        
-        {/* Define route for individual patient page */}
-        <Route path="/patients/:patientId" element={<PatientPage />} />
-        
-        {/* Define route for adding a new patient */}
-        <Route path="/add-patient" element={<PatientForm />} />
-        
-        {/* Define route for editing a patient */}
-        <Route path="/edit-patient/:patientId" element={<PatientForm />} />
-        
-        {/* Define route for adding a new day record */}
-        <Route path="/add-record/:patientId" element={<DayRecordForm />} />
-        
-        {/* Define route for editing an existing day record */}
-        <Route path="/edit-record/:patientId/:recordId" element={<DayRecordForm />} />
-      </Routes>
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
+      {/* Sidebar */}
+      <Sidebar
+        expanded={sidebarExpanded}
+        onToggle={() => setSidebarExpanded(!sidebarExpanded)}
+      />
+
+      {/* Main Content */}
+      <div style={{ flexGrow: 1 }}>
+        {/* Header */}
+        <Header
+          sidebarExpanded={sidebarExpanded}
+          onSidebarToggle={() => setSidebarExpanded(!sidebarExpanded)}
+        />
+
+        {/* Main Page Content */}
+        <div
+          style={{
+            padding: '20px',
+            marginTop: 64, // Add margin to account for the height of the header (64px is default AppBar height)
+            marginLeft: sidebarExpanded ? 240 : 80,
+            transition: 'margin-left 0.3s ease',
+          }}
+        >
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/patients/:patientId" element={<PatientPage />} />
+            <Route
+              path="/patient/:patientId?"
+              element={<PatientForm onSave={handleSavePatient} />}
+            />
+            <Route
+              path="/day-record/:patientId/:recordId?"
+              element={
+                <DayRecordForm
+                  onSave={(data) => console.log('Day record saved/updated:', data)}
+                />
+              }
+            />
+            <Route path="/admin" element={<AdminPage />} />
+          </Routes>
+        </div>
+      </div>
     </div>
   );
 }

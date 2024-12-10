@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  MenuItem,
+} from '@mui/material';
 
-function PatientForm({ patientData, onSave }) {
+function PatientForm({ open, onClose, patientData, onSave }) {
   const [formData, setFormData] = useState({
     study_code: '',
     abbreviation_name: '',
@@ -12,6 +22,13 @@ function PatientForm({ patientData, onSave }) {
   useEffect(() => {
     if (patientData) {
       setFormData(patientData); // Pre-fill form if editing an existing patient
+    } else {
+      setFormData({
+        study_code: '',
+        abbreviation_name: '',
+        year_of_birth: '',
+        gender: '',
+      });
     }
   }, [patientData]);
 
@@ -23,74 +40,75 @@ function PatientForm({ patientData, onSave }) {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const method = patientData ? 'put' : 'post';
-    const url = patientData ? `/api/patients/${patientData.id}` : '/api/patients/';
-
-    axios[method](url, formData)
-      .then((response) => {
-        onSave(response.data);
-        setFormData({
-          study_code: '',
-          abbreviation_name: '',
-          year_of_birth: '',
-          gender: '',
-        });
-      })
-      .catch((error) => {
-        console.error('Error saving patient:', error);
-      });
+  const handleSubmit = async () => {
+    try {
+      const method = patientData ? 'put' : 'post';
+      const url = patientData ? `patients/${patientData.id}` : 'patients/';
+      const response = await api[method](url, formData);
+      onSave(response.data);
+      onClose(); // Close the dialog after saving
+    } catch (error) {
+      console.error('Error saving patient:', error);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label>Study Code:</label>
-        <input
-          type="text"
-          name="study_code"
-          value={formData.study_code}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label>Abbreviation Name:</label>
-        <input
-          type="text"
-          name="abbreviation_name"
-          value={formData.abbreviation_name}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label>Year of Birth:</label>
-        <input
-          type="number"
-          name="year_of_birth"
-          value={formData.year_of_birth}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label>Gender:</label>
-        <select
-          name="gender"
-          value={formData.gender}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Select Gender</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-      <button type="submit">{patientData ? 'Update' : 'Save'} Patient</button>
-    </form>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle>{patientData ? 'Edit Patient' : 'Add New Patient'}</DialogTitle>
+      <DialogContent>
+        <Box component="form" noValidate autoComplete="off" sx={{ mt: 2 }}>
+          <TextField
+            fullWidth
+            label="Study Code"
+            name="study_code"
+            value={formData.study_code}
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
+          <TextField
+            fullWidth
+            label="Abbreviation Name"
+            name="abbreviation_name"
+            value={formData.abbreviation_name}
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
+          <TextField
+            fullWidth
+            label="Year of Birth"
+            name="year_of_birth"
+            type="number"
+            value={formData.year_of_birth}
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
+          <TextField
+            select
+            fullWidth
+            label="Gender"
+            name="gender"
+            value={formData.gender}
+            onChange={handleChange}
+            margin="normal"
+            required
+          >
+            <MenuItem value="Male">Male</MenuItem>
+            <MenuItem value="Female">Female</MenuItem>
+          </TextField>
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} color="secondary">
+          Cancel
+        </Button>
+        <Button onClick={handleSubmit} variant="contained" color="primary">
+          {patientData ? 'Update' : 'Save'}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }
 
