@@ -105,7 +105,7 @@ function DayRecordForm({ patientId, recordData, onSave }) {
             value={formData.date_of_alert}
             onChange={handleChange}
             InputLabelProps={{ shrink: true }}
-            required
+            // required
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -117,7 +117,7 @@ function DayRecordForm({ patientId, recordData, onSave }) {
             value={formData.time_of_alert}
             onChange={handleChange}
             InputLabelProps={{ shrink: true }}
-            required
+            // required
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -129,7 +129,7 @@ function DayRecordForm({ patientId, recordData, onSave }) {
             value={formData.date_of_assessment}
             onChange={handleChange}
             InputLabelProps={{ shrink: true }}
-            required
+            // required
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -152,7 +152,7 @@ function DayRecordForm({ patientId, recordData, onSave }) {
             name="possible_reason_id"
             value={formData.possible_reason_id}
             onChange={handleChange}
-            required
+            // required
           >
             {possibleReasons.map((reason) => (
               <MenuItem key={reason.id} value={reason.id}>
@@ -170,7 +170,7 @@ function DayRecordForm({ patientId, recordData, onSave }) {
             value={formData.new_information}
             onChange={handleChange}
             inputProps={{ min: 0, max: 7 }}
-            required
+            // required
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -182,7 +182,7 @@ function DayRecordForm({ patientId, recordData, onSave }) {
             value={formData.expected_alert}
             onChange={handleChange}
             inputProps={{ min: 0, max: 7 }}
-            required
+            // required
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -193,7 +193,7 @@ function DayRecordForm({ patientId, recordData, onSave }) {
             name="event_at_alert_id"
             value={formData.event_at_alert_id}
             onChange={handleChange}
-            required
+            // required
           >
             {events.map((event) => (
               <MenuItem key={event.id} value={event.id}>
