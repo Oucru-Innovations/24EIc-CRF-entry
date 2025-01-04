@@ -6,7 +6,7 @@ function Header() {
     <AppBar position="static" color="primary">
       <Toolbar>
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          Patient Management System
+          AI-POWERED TETANUS MONITORING
         </Typography>
       </Toolbar>
     </AppBar>

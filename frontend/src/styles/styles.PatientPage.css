@@ -1,0 +1,7 @@
+/* styles.css or any CSS file */
+.dataGridHeader {
+    white-space: normal !important;
+    line-height: 1.2;
+    text-align: center;
+    word-wrap: break-word;
+}

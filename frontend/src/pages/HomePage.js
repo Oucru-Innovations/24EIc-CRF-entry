@@ -65,7 +65,7 @@ function HomePage() {
   const columns = [
     { field: 'id', headerName: 'ID', width: 70 },
     { field: 'study_code', headerName: 'Study Code', width: 150 },
-    { field: 'abbreviation_name', headerName: 'Name', width: 150 },
+    { field: 'abbreviation_name', headerName: 'Initials', width: 150 },
     { field: 'year_of_birth', headerName: 'Year of Birth', width: 130 },
     { field: 'gender', headerName: 'Gender', width: 100 },
     {
@@ -103,7 +103,7 @@ function HomePage() {
 
   return (
     <div>
-      <h1>Patients Overview</h1>
+      <h1>Patient</h1>
       <div style={{ height: 400, width: '100%' }}>
         <DataGrid
           rows={patients}

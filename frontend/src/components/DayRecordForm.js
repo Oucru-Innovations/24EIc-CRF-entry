@@ -83,9 +83,9 @@ function DayRecordForm({ patientId, recordData, onSave }) {
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2, p: 3, backgroundColor: '#f9f9f9', borderRadius: 2 }}>
-      <Typography variant="h6" gutterBottom>
+      {/* <Typography variant="h6" gutterBottom>
         {recordData ? 'Edit Day Record' : 'Add New Day Record'}
-      </Typography>
+      </Typography> */}
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
           <TextField
@@ -94,6 +94,7 @@ function DayRecordForm({ patientId, recordData, onSave }) {
             value={patientStudyCode}
             InputProps={{ readOnly: true }}
             margin="normal"
+            required
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -129,7 +130,7 @@ function DayRecordForm({ patientId, recordData, onSave }) {
             value={formData.date_of_assessment}
             onChange={handleChange}
             InputLabelProps={{ shrink: true }}
-            // required
+            required
           />
         </Grid>
         <Grid item xs={12} sm={6}>

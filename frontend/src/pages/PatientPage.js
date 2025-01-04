@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'; // Import back icon
 import DayRecordForm from '../components/DayRecordForm'; // Import the DayRecordForm component
-
+import styles from '../styles/styles.PatientPage.css';
 function PatientPage() {
   const { patientId } = useParams();
   const navigate = useNavigate();
@@ -88,11 +88,12 @@ function PatientPage() {
   };
 
   const columns = [
-    { field: 'id', headerName: 'ID', width: 70 },
+    { field: 'id', headerName: 'ID', width: 50, headerClassName: 'data-grid-header' },
     {
       field: 'actions',
       headerName: 'Actions',
       width: 200,
+      headerClassName: 'data-grid-header',
       renderCell: (params) => (
         <>
           <Button
@@ -113,15 +114,50 @@ function PatientPage() {
         </>
       ),
     },
-    { field: 'date_of_alert', headerName: 'Date of Alert', width: 120 },
-    { field: 'time_of_alert', headerName: 'Time of Alert', width: 100 },
-    { field: 'date_of_assessment', headerName: 'Date of Assessment', width: 140 },
-    { field: 'time_of_assessment', headerName: 'Time of Assessment', width: 140 },
-    { field: 'new_information', headerName: 'New Information', width: 50 },
-    { field: 'expected_alert', headerName: 'Expected Alert', width: 50 },
-    { field: 'event_during_24_hours', headerName: 'Event During 24 Hours', width: 180 },
-    
+    { field: 'date_of_alert', headerName: 'Date of Alert', width: 100, headerClassName: styles.dataGridHeader },
+    { field: 'time_of_alert', headerName: 'Time of Alert', width: 100, headerClassName: styles.dataGridHeader },
+    { field: 'date_of_assessment', headerName: 'Date of Assessment', width: 100, headerClassName: styles.dataGridHeader },
+    { field: 'time_of_assessment', headerName: 'Time of Assessment', width: 100, headerClassName: styles.dataGridHeader },
+    { field: 'new_information', headerName: 'New Information', width: 100, headerClassName: styles.dataGridHeader },
+    { field: 'expected_alert', headerName: 'Expected Alert', width: 100, headerClassName: styles.dataGridHeader },
+    { field: 'event_during_24_hours', headerName: 'Event During 24 Hours', width: 180, headerClassName: styles.dataGridHeader },
   ];
+  
+  // const columns = [
+  //   { field: 'id', headerName: 'ID', width: 50 },
+  //   {
+  //     field: 'actions',
+  //     headerName: 'Actions',
+  //     width: 200,
+  //     renderCell: (params) => (
+  //       <>
+  //         <Button
+  //           variant="contained"
+  //           color="primary"
+  //           onClick={() => handleDialogOpen(params.row)}
+  //           style={{ marginRight: 10 }}
+  //         >
+  //           Edit
+  //         </Button>
+  //         <Button
+  //           variant="contained"
+  //           color="error"
+  //           onClick={() => handleDeleteRecord(params.row.id)}
+  //         >
+  //           Delete
+  //         </Button>
+  //       </>
+  //     ),
+  //   },
+  //   { field: 'date_of_alert', headerName: 'Date of Alert', width: 100 },
+  //   { field: 'time_of_alert', headerName: 'Time of Alert', width: 100 },
+  //   { field: 'date_of_assessment', headerName: 'D.O.A', width: 100 },
+  //   { field: 'time_of_assessment', headerName: 'T.O.A', width: 50 },
+  //   { field: 'new_information', headerName: 'New Info', width: 50 },
+  //   { field: 'expected_alert', headerName: 'Expected Alert', width: 50 },
+  //   { field: 'event_during_24_hours', headerName: 'Event During 24 Hours', width: 180 },
+    
+  // ];
 
   return (
     <div>
@@ -132,9 +168,12 @@ function PatientPage() {
               <ArrowBackIcon fontSize="large" />
             </IconButton>
             <h1>
-              Patient Details: {patient?.study_code} - {patient?.abbreviation_name}
+              Observation 
             </h1>
           </Box>
+          <p>
+            <strong>Study code:</strong> {patient?.study_code} - {patient?.abbreviation_name}
+          </p>
           <p>
             <strong>Year of Birth:</strong> {patient.year_of_birth}
           </p>
@@ -160,7 +199,7 @@ function PatientPage() {
             onClick={() => handleDialogOpen()}
             style={{ marginTop: '20px' }}
           >
-            Add New Record
+            Add Observation
           </Button>
 
           <Dialog open={isDialogOpen} onClose={handleDialogClose} maxWidth="sm" fullWidth>
