@@ -21,12 +21,23 @@ function PatientPage() {
   const [dayRecords, setDayRecords] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentRecord, setCurrentRecord] = useState(null);
+  const [reasons, setReasons] = useState([]);
+  const [events, setEvents] = useState([]);
 
   useEffect(() => {
     // Fetch patient details
     api.get(`patients/${patientId}`)
       .then((response) => setPatient(response.data))
       .catch((error) => console.error('Error fetching patient details:', error));
+
+    // Fetch reasons data
+    api.get(`options/possible-reasons`)
+      .then((response) => setReasons(response.data))
+      .catch((error) => console.error('Error fetching reasons:', error));
+    // Fetch events data
+    api.get(`options/events`)
+      .then((response) => setEvents(response.data))
+      .catch((error) => console.error('Error fetching events:', error));
 
     // Fetch patient's day records
     fetchDayRecords();
@@ -87,6 +98,23 @@ function PatientPage() {
       .catch((error) => console.error('Error deleting day record:', error));
   };
 
+  //get Reason Name by ID
+  const getReasonNameById = (id) => {
+    if (id === undefined || id === null) {
+      return 'Unknown';
+    }
+    const reason = reasons.find((reason) => reason.id === id);
+    return reason ? reason.reason : 'Unknown';
+  };
+  //get Event Name by ID
+  const getEventNameById = (id) => {
+    if (id === undefined || id === null) {
+      return 'Unknown';
+    }
+    const event = events.find((event) => event.id === id);
+    return event ? event.event : 'Unknown';
+  };
+
   const columns = [
     { field: 'id', headerName: 'ID', width: 70 },
     {
@@ -119,6 +147,23 @@ function PatientPage() {
     { field: 'time_of_assessment', headerName: 'Time of Assessment', width: 140 },
     { field: 'new_information', headerName: 'New Information', width: 50 },
     { field: 'expected_alert', headerName: 'Expected Alert', width: 50 },
+    // { field: 'possible_reason_id', headerName: 'Reason ID', width: 50 },
+    {
+      field: 'possible_reason_id',
+      headerName: 'Possible Reason',
+      width: 100,
+      valueGetter: (params) => { // Debugging line
+        return getReasonNameById(params);
+      },
+    },
+    {
+      field: 'event_at_alert_id',
+      headerName: 'Event at Alert',
+      width: 100,
+      valueGetter: (params) => { // Debugging line
+        return getEventNameById(params);
+      },
+    },
     { field: 'event_during_24_hours', headerName: 'Event During 24 Hours', width: 180 },
     
   ];

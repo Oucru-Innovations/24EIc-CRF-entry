@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from sqlmodel import SQLModel, Session
 from backend.app.database import engine
 from backend.app.models import PossibleReason, Event
