@@ -167,3 +167,14 @@ export const deleteEvent = async (id) => {
     throw error;
   }
 };
+
+// Fetch the latest system log entry (email mode status)
+export const getLatestSystemLog = async () => {
+  try {
+    const response = await api.get('logs/system_log/latest');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching latest system log:', error);
+    throw error;
+  }
+};

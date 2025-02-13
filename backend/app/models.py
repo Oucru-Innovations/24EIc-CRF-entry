@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List
 from enum import Enum
+from datetime import date, time, datetime
 
 # Gender Enum (Only Male and Female)
 class GenderEnum(str, Enum):
@@ -18,7 +19,9 @@ class Patient(SQLModel, table=True):
     gender: GenderEnum
 
     # Relationship to PatientDayRecord
-    day_records: List["PatientDayRecord"] = Relationship(back_populates="patient")
+    day_records: list["PatientDayRecord"] = Relationship(back_populates="patient")
+    model_log: list["ModelLog"] = Relationship(back_populates="patient",sa_relationship_kwargs={"cascade": "all, delete"})
+    pipeline_log: list["PipelineLog"] = Relationship(back_populates="patient",sa_relationship_kwargs={"cascade": "all, delete"})
 
 # PossibleReason model
 class PossibleReason(SQLModel, table=True):
@@ -53,3 +56,36 @@ class PatientDayRecord(SQLModel, table=True):
     patient: Patient = Relationship(back_populates="day_records")
     possible_reason: PossibleReason = Relationship()
     event_at_alert: Event = Relationship()
+
+class ModelLog(SQLModel, table=True):
+    __tablename__ = "model_log"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    patient_id: int = Field(foreign_key="patients.id")  # Reference to patients table
+    content: str
+    raw_content: str
+    date: date
+    time: time
+    
+    patient: Patient = Relationship(back_populates="model_log")
+    
+
+class PipelineLog(SQLModel, table=True):
+    __tablename__ = "pipeline_log"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    patient_id: int = Field(foreign_key="patients.id")  # Reference to patients table
+    date: date
+    time: time
+    content: str
+    raw_content: str
+    # Email mode: 0 off while 1 on
+    # email_mode: bool
+    # change_email_mode_timestamp: datetime
+    patient: Patient = Relationship(back_populates="pipeline_log")
+
+class SystemLog(SQLModel, table=True):
+    __tablename__ = "system_log"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    # Email mode: 0 off while 1 on
+    email_mode: bool
+    change_email_mode_timestamp: datetime
+    

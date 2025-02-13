@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Button, Box, IconButton } from '@mui/material';
+import { Button, Box, IconButton, Switch, FormControlLabel } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { Edit, Delete } from '@mui/icons-material';
 import PatientForm from '../components/PatientForm';
@@ -10,9 +10,11 @@ function HomePage() {
   const [patients, setPatients] = useState([]);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [editingPatient, setEditingPatient] = useState(null);
+  const [emailMode, setEmailMode] = useState(false);
 
   useEffect(() => {
     fetchPatients();
+    fetchEmailMode();
   }, []);
 
   const fetchPatients = () => {
@@ -22,6 +24,37 @@ function HomePage() {
       })
       .catch((error) => {
         console.error('Error fetching patients:', error);
+      });
+  };
+
+  // Fetch the current email mode from SystemLog API
+  const fetchEmailMode = () => {
+    api.get('logs/system_log/latest') // Adjust endpoint if needed
+      .then((response) => {
+        if (response.data) {
+          setEmailMode(response.data.email_mode);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching email mode:', error);
+      });
+  };
+
+  // Toggle email mode
+  const handleToggleEmailMode = () => {
+    const newMode = !emailMode;
+    setEmailMode(newMode); // Optimistic UI update
+
+    api.post('/logs/system_log/', {
+      email_mode: newMode,
+      change_email_mode_timestamp: new Date().toISOString(),
+    })
+      .then(() => {
+        console.log('Email mode updated successfully');
+      })
+      .catch((error) => {
+        console.error('Error updating email mode:', error);
+        setEmailMode(!newMode); // Revert UI on failure
       });
   };
 
@@ -104,6 +137,21 @@ function HomePage() {
   return (
     <div>
       <h1>Patient</h1>
+
+      {/* Email Mode Toggle */}
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={emailMode}
+              onChange={handleToggleEmailMode}
+              color="primary"
+            />
+          }
+          label={`Email Mode: ${emailMode ? 'ON' : 'OFF'}`}
+        />
+      </Box>
+      
       <div style={{ height: 400, width: '100%' }}>
         <DataGrid
           rows={patients}

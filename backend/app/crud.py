@@ -1,5 +1,9 @@
 from sqlmodel import Session, select
-from backend.app.models import Patient, PatientDayRecord, PossibleReason, Event
+from backend.app.models import (
+    Patient, PatientDayRecord, PossibleReason, 
+    Event, ModelLog, PipelineLog, SystemLog
+)
+from datetime import datetime
 
 # --- Patient CRUD Operations ---
 
@@ -175,3 +179,132 @@ def delete_event(db: Session, event_id: int):
     db.delete(event)
     db.commit()
     return event
+
+
+# --- ModelLog CRUD Operations ---
+
+def create_model_log(db: Session, log: ModelLog):
+    db.add(log)
+    db.commit()
+    db.refresh(log)
+    return log
+
+
+def get_model_logs(db: Session, patient_id: int, skip: int = 0, limit: int = 100):
+    statement = select(ModelLog).where(ModelLog.patient_id == patient_id).offset(skip).limit(limit)
+    return db.exec(statement).all()
+
+
+def get_model_log_by_id(db: Session, log_id: int):
+    return db.get(ModelLog, log_id)
+
+
+def update_model_log(db: Session, log_id: int, updated_log: ModelLog):
+    log = db.get(ModelLog, log_id)
+    if not log:
+        return None
+    for field, value in updated_log.dict(exclude_unset=True).items():
+        setattr(log, field, value)
+    db.add(log)
+    db.commit()
+    db.refresh(log)
+    return log
+
+
+def delete_model_log(db: Session, log_id: int):
+    log = db.get(ModelLog, log_id)
+    if not log:
+        return None
+    db.delete(log)
+    db.commit()
+    return log
+
+# --- PipelineLog CRUD Operations ---
+
+def create_pipeline_log(db: Session, log: PipelineLog):
+    db.add(log)
+    db.commit()
+    db.refresh(log)
+    return log
+
+
+def get_pipeline_logs(db: Session, patient_id: int, skip: int = 0, limit: int = 100):
+    statement = select(PipelineLog).where(PipelineLog.patient_id == patient_id).offset(skip).limit(limit)
+    return db.exec(statement).all()
+
+
+def get_pipeline_log_by_id(db: Session, log_id: int):
+    return db.get(PipelineLog, log_id)
+
+
+def update_pipeline_log(db: Session, log_id: int, updated_log: PipelineLog):
+    log = db.get(PipelineLog, log_id)
+    if not log:
+        return None
+    for field, value in updated_log.dict(exclude_unset=True).items():
+        setattr(log, field, value)
+    db.add(log)
+    db.commit()
+    db.refresh(log)
+    return log
+
+
+def delete_pipeline_log(db: Session, log_id: int):
+    log = db.get(PipelineLog, log_id)
+    if not log:
+        return None
+    db.delete(log)
+    db.commit()
+    return log
+
+# --- SystemLog CRUD Operations ---
+
+def create_system_log(log: SystemLog, db: Session):
+    # Ensure timestamp is converted to datetime
+    if isinstance(log.change_email_mode_timestamp, str):
+        log.change_email_mode_timestamp = datetime.fromisoformat(log.change_email_mode_timestamp.rstrip("Z"))
+
+    # Create a new log entry
+    new_log = SystemLog(
+        email_mode=log.email_mode,
+        change_email_mode_timestamp=log.change_email_mode_timestamp
+    )
+
+    db.add(new_log)
+    db.commit()
+    db.refresh(new_log)
+
+    # **Convert to a dictionary for serialization**
+    return new_log.dict()
+
+
+def get_system_logs(db: Session, skip: int = 0, limit: int = 100, order_by: str = "asc"):
+    statement = select(SystemLog).order_by(SystemLog.change_email_mode_timestamp.desc() 
+                        if order_by == "desc" else SystemLog.change_email_mode_timestamp.asc()).offset(skip).limit(limit)
+    return db.exec(statement).all()
+
+
+
+def get_system_log_by_id(db: Session, log_id: int):
+    return db.get(SystemLog, log_id)
+
+
+def update_system_log(db: Session, log_id: int, updated_log: SystemLog):
+    log = db.get(SystemLog, log_id)
+    if not log:
+        return None
+    for field, value in updated_log.dict(exclude_unset=True).items():
+        setattr(log, field, value)
+    db.add(log)
+    db.commit()
+    db.refresh(log)
+    return log
+
+
+def delete_system_log(db: Session, log_id: int):
+    log = db.get(SystemLog, log_id)
+    if not log:
+        return None
+    db.delete(log)
+    db.commit()
+    return log
