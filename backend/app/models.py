@@ -8,6 +8,11 @@ class GenderEnum(str, Enum):
     male = "Male"
     female = "Female"
 
+# Status Enum (Active or Inactive)
+class StatusEnum(str, Enum):
+    active = "Active"
+    inactive = "Inactive"
+
 # Patient model
 class Patient(SQLModel, table=True):
     __tablename__ = "patients"  # Explicitly set table name
@@ -17,7 +22,9 @@ class Patient(SQLModel, table=True):
     abbreviation_name: str
     year_of_birth: int
     gender: GenderEnum
-
+    status: StatusEnum
+    # status: Enum = Enum("Active", "Inactive")
+    # status_date: Optional[date] = Field(default=None)
     # Relationship to PatientDayRecord
     day_records: list["PatientDayRecord"] = Relationship(back_populates="patient")
     model_log: list["ModelLog"] = Relationship(back_populates="patient",sa_relationship_kwargs={"cascade": "all, delete"})

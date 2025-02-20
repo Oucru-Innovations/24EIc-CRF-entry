@@ -20,6 +20,10 @@ def get_patients(db: Session, skip: int = 0, limit: int = 100):
 def get_patient_by_id(db: Session, patient_id: int):
     return db.get(Patient, patient_id)
 
+def get_patient_by_study_code(db: Session, patient_code: str):
+    statement = select(Patient).where(Patient.study_code == patient_code)
+    return db.exec(statement).first()
+
 def update_patient(db: Session, patient_id: int, patient: Patient):
     # Fetch the existing patient
     existing_patient = db.get(Patient, patient_id)
@@ -31,6 +35,8 @@ def update_patient(db: Session, patient_id: int, patient: Patient):
     existing_patient.abbreviation_name = patient.abbreviation_name
     existing_patient.year_of_birth = patient.year_of_birth
     existing_patient.gender = patient.gender
+    existing_patient.status = patient.status
+    existing_patient.status_date = patient.status_date
 
     # Commit changes to the database
     db.add(existing_patient)

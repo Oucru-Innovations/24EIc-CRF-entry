@@ -3,6 +3,7 @@ from sqlmodel import Session
 from backend.app.database import get_session
 from backend.app.models import Patient
 import backend.app.crud as crud
+from fastapi.responses import JSONResponse
 
 router = APIRouter()
 
@@ -27,6 +28,18 @@ def get_patient(patient_id: int, db: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Patient not found")
     return patient
 
+# Get a Single Patient by Study Code
+@router.get("/get_patient_by_study_code/{study_code}", response_model=Patient)
+def get_patient(study_code: int, db: Session = Depends(get_session)):
+    # patient = crud.get_patient_by_id(db=db, patient_id=patient_id)
+    patient = crud.get_patient_by_study_code(db=db, study_code=study_code)
+    if not patient:
+        return JSONResponse(
+            status_code=404,
+            content={"message": "Patient not found", "study_code": study_code, "exists": False},
+        )
+    return patient
+
 # Update a Patient
 @router.put("/{patient_id}", response_model=Patient)
 def update_patient(patient_id: int, patient: Patient, db: Session = Depends(get_session)):
@@ -42,3 +55,4 @@ def delete_patient(patient_id: int, db: Session = Depends(get_session)):
     if not deleted_patient:
         raise HTTPException(status_code=404, detail="Patient not found")
     return {"message": "Patient and associated records deleted successfully"}
+

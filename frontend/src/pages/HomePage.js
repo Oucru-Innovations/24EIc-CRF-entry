@@ -58,6 +58,34 @@ function HomePage() {
       });
   };
 
+  // Toggle patient status (Active/Inactive)
+  const handleToggleStatus = (id, currentStatus) => {
+    const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+
+    // Optimistically update the UI
+    setPatients((prevPatients) =>
+      prevPatients.map((patient) =>
+        patient.id === id ? { ...patient, status: newStatus } : patient
+      )
+    );
+
+    // Send API request to update status
+    api.put(`patients/${id}`, { status: newStatus })
+      .then(() => {
+        console.log(`Patient ${id} status updated to ${newStatus}`);
+      })
+      .catch((error) => {
+        console.error(`Error updating patient ${id} status:`, error);
+        // Revert UI update if API fails
+        setPatients((prevPatients) =>
+          prevPatients.map((patient) =>
+            patient.id === id ? { ...patient, status: currentStatus } : patient
+          )
+        );
+      });
+  };
+
+
   const handleSavePatient = (savedPatient) => {
     // Update the list if editing or add the new patient
     setPatients((prevPatients) => {
@@ -101,6 +129,18 @@ function HomePage() {
     { field: 'abbreviation_name', headerName: 'Initials', width: 150 },
     { field: 'year_of_birth', headerName: 'Year of Birth', width: 130 },
     { field: 'gender', headerName: 'Gender', width: 100 },
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 150,
+      renderCell: (params) => (
+        <Switch
+          checked={params.row.status === 'Active'}
+          onChange={() => handleToggleStatus(params.row.id, params.row.status)}
+          color="primary"
+        />
+      ),
+    },
     {
       field: 'actions',
       headerName: 'Actions',
@@ -148,7 +188,7 @@ function HomePage() {
               color="primary"
             />
           }
-          label={`Email Mode: ${emailMode ? 'ON' : 'OFF'}`}
+          label={`Alert Mode: ${emailMode ? 'ON' : 'OFF'}`}
         />
       </Box>
       
