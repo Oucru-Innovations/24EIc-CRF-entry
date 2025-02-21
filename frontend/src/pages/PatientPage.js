@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import {
   Button,
   Box,
@@ -34,7 +34,15 @@ function PatientPage() {
 
   const fetchDayRecords = () => {
     api.get(`patient-day-records/?patient_id=${patientId}`)
-      .then((response) => setDayRecords(response.data))
+      .then((response) => {
+        // Transform the response data to combine date & time fields
+        const transformedData = response.data.map((record) => ({
+          ...record,
+          alert_datetime: `${record.date_of_alert} ${record.time_of_alert}`,
+          assessment_datetime: `${record.date_of_assessment} ${record.time_of_assessment}`,
+        }));
+        setDayRecords(transformedData);
+      })
       .catch((error) => {
         console.error('Error fetching day records:', error);
         if (error.response?.status === 404) {
@@ -92,7 +100,7 @@ function PatientPage() {
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 200,
+      width: 150,
       headerClassName: 'data-grid-header',
       renderCell: (params) => (
         <>
@@ -114,13 +122,15 @@ function PatientPage() {
         </>
       ),
     },
-    { field: 'date_of_alert', headerName: 'Date of Alert', width: 100, headerClassName: styles.dataGridHeader },
-    { field: 'time_of_alert', headerName: 'Time of Alert', width: 100, headerClassName: styles.dataGridHeader },
-    { field: 'date_of_assessment', headerName: 'Date of Assessment', width: 100, headerClassName: styles.dataGridHeader },
-    { field: 'time_of_assessment', headerName: 'Time of Assessment', width: 100, headerClassName: styles.dataGridHeader },
-    { field: 'new_information', headerName: 'New Information', width: 100, headerClassName: styles.dataGridHeader },
-    { field: 'expected_alert', headerName: 'Expected Alert', width: 100, headerClassName: styles.dataGridHeader },
-    { field: 'event_during_24_hours', headerName: 'Event During 24 Hours', width: 180, headerClassName: styles.dataGridHeader },
+    // { field: 'date_of_alert', headerName: 'Date of Alert', width: 100, headerClassName: styles.dataGridHeader },
+    // { field: 'time_of_alert', headerName: 'Time of Alert', width: 100, headerClassName: styles.dataGridHeader },
+    // { field: 'date_of_assessment', headerName: 'Date of Assessment', width: 100, headerClassName: styles.dataGridHeader },
+    // { field: 'time_of_assessment', headerName: 'Time of Assessment', width: 100, headerClassName: styles.dataGridHeader },
+    { field: 'alert_datetime', headerName: 'Alert Time', width: 200, headerClassName: styles.dataGridHeader },
+    { field: 'assessment_datetime', headerName: 'Assessment Time', width: 200, headerClassName: styles.dataGridHeader },
+    { field: 'new_information', headerName: 'New Information', width: 350, headerClassName: styles.dataGridHeader },
+    { field: 'expected_alert', headerName: 'Expected Alert', width: 350, headerClassName: styles.dataGridHeader },
+    // { field: 'event_during_24_hours', headerName: 'Event During 24 Hours', width: 300, headerClassName: styles.dataGridHeader },
   ];
   
   // const columns = [
@@ -190,6 +200,7 @@ function PatientPage() {
               rowsPerPageOptions={[5]}
               autoHeight
               disableSelectionOnClick
+              slots={{ toolbar: GridToolbar }}
             />
           </Box>
           <Button
