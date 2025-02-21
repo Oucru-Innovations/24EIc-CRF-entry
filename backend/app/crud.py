@@ -3,7 +3,7 @@ from backend.app.models import (
     Patient, PatientDayRecord, PossibleReason, 
     Event, ModelLog, PipelineLog, SystemLog
 )
-from datetime import datetime
+from datetime import datetime,date,time
 
 # --- Patient CRUD Operations ---
 
@@ -36,7 +36,7 @@ def update_patient(db: Session, patient_id: int, patient: Patient):
     existing_patient.year_of_birth = patient.year_of_birth
     existing_patient.gender = patient.gender
     existing_patient.status = patient.status
-    existing_patient.status_date = patient.status_date
+    # existing_patient.status_date = patient.status_date
 
     # Commit changes to the database
     db.add(existing_patient)
@@ -190,6 +190,11 @@ def delete_event(db: Session, event_id: int):
 # --- ModelLog CRUD Operations ---
 
 def create_model_log(db: Session, log: ModelLog):
+    # Ensure date and time are proper Python objects
+    if isinstance(log.date, str):
+        log.date = date.fromisoformat(log.date)
+    if isinstance(log.time, str):
+        log.time = time.fromisoformat(log.time)
     db.add(log)
     db.commit()
     db.refresh(log)

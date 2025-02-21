@@ -107,6 +107,7 @@ def create_system_log(log: SystemLog, db: Session = Depends(get_session)):
         log.change_email_mode_timestamp = datetime.fromisoformat(log.change_email_mode_timestamp.rstrip("Z"))
     return crud.create_system_log(db=db, log=log)
 
+#get status send email
 @router.get("/system_log/latest", response_model=SystemLog)
 def get_latest_system_log(db: Session = Depends(get_session)):
     logs = crud.get_system_logs(db=db, skip=0, limit=1, order_by="desc")  # Fetch latest log

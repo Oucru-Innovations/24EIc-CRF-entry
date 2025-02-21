@@ -11,6 +11,7 @@ function HomePage() {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [editingPatient, setEditingPatient] = useState(null);
   const [emailMode, setEmailMode] = useState(false);
+  const [modelStatus, setModelStatus] = useState(false);
 
   useEffect(() => {
     fetchPatients();
@@ -40,6 +41,32 @@ function HomePage() {
       });
   };
 
+  // Toggle model status
+  const handleToggleModel = async () => {
+    const newStatus = !modelStatus;
+    setModelStatus(newStatus); // Optimistic UI update
+
+    try {
+      const endpoint = newStatus ? '/start' : '/stop';
+      const response = await fetch(`http://localhost:5000${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      console.log(`Model ${newStatus ? 'started' : 'stopped'} successfully`);
+    } catch (error) {
+      console.error('Error toggling model:', error);
+      setModelStatus(!newStatus); // Revert UI on failure
+      // You might want to show an error message to the user here
+    }
+  };
+
   // Toggle email mode
   const handleToggleEmailMode = () => {
     const newMode = !emailMode;
@@ -62,6 +89,8 @@ function HomePage() {
   const handleToggleStatus = (id, currentStatus) => {
     const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
 
+    // Find the current patient to get all their data
+    const currentPatient = patients.find(patient => patient.id === id);
     // Optimistically update the UI
     setPatients((prevPatients) =>
       prevPatients.map((patient) =>
@@ -70,7 +99,7 @@ function HomePage() {
     );
 
     // Send API request to update status
-    api.put(`patients/${id}`, { status: newStatus })
+    api.put(`patients/${id}`, { ...currentPatient, status: newStatus })
       .then(() => {
         console.log(`Patient ${id} status updated to ${newStatus}`);
       })
@@ -189,6 +218,16 @@ function HomePage() {
             />
           }
           label={`Alert Mode: ${emailMode ? 'ON' : 'OFF'}`}
+        />
+                <FormControlLabel
+          control={
+            <Switch
+              checked={modelStatus}
+              onChange={handleToggleModel}
+              color="secondary"
+            />
+          }
+          label={`Model Status: ${modelStatus ? 'ON' : 'OFF'}`}
         />
       </Box>
       

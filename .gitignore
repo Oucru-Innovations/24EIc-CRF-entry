@@ -1,5 +1,5 @@
 # .gitignore for Project Root (backend + frontend)
-
+venv/
 # Node modules (for frontend)
 frontend/node_modules/
 frontend/.pnp/

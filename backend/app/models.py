@@ -2,6 +2,7 @@ from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List
 from enum import Enum
 from datetime import date, time, datetime
+from pydantic import validator
 
 # Gender Enum (Only Male and Female)
 class GenderEnum(str, Enum):
@@ -75,6 +76,17 @@ class ModelLog(SQLModel, table=True):
     
     patient: Patient = Relationship(back_populates="model_log")
     
+    @validator('date', pre=True)
+    def validate_date(cls, v):
+        if isinstance(v, str):
+            return date.fromisoformat(v)
+        return v
+        
+    @validator('time', pre=True)
+    def validate_time(cls, v):
+        if isinstance(v, str):
+            return time.fromisoformat(v)
+        return v
 
 class PipelineLog(SQLModel, table=True):
     __tablename__ = "pipeline_log"
