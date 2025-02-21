@@ -22,7 +22,7 @@ class Patient(SQLModel, table=True):
     abbreviation_name: str
     year_of_birth: int
     gender: GenderEnum
-    status: StatusEnum
+    status: StatusEnum = Field(default=StatusEnum.active)
     # status: Enum = Enum("Active", "Inactive")
     # status_date: Optional[date] = Field(default=None)
     # Relationship to PatientDayRecord
