@@ -51,16 +51,16 @@ class PatientDayRecord(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     patient_id: int = Field(foreign_key="patients.id")  # Reference to patients table
-    date_of_alert: str
-    time_of_alert: str
-    date_of_assessment: str
-    time_of_assessment: str
-    possible_reason_id: int = Field(foreign_key="possible_reasons.id")  # Reference to possible_reasons table
-    new_information: int  # Scale 0-7
-    expected_alert: int  # Scale 0-7
-    event_at_alert_id: int = Field(foreign_key="events.id")  # Reference to events table
+    date_of_alert: Optional[str] = None
+    time_of_alert: Optional[str] = None
+    date_of_assessment: Optional[str] = None
+    time_of_assessment: Optional[str] = None
+    possible_reason_id: Optional[int] = Field(default=None, foreign_key="possible_reasons.id")  # Reference to possible_reasons table
+    new_information: Optional[int] = None  # Scale 0-7
+    expected_alert: Optional[int] = None  # Scale 0-7
+    event_at_alert_id: Optional[int] = Field(default=None, foreign_key="events.id")  # Reference to events table
     event_during_24_hours: Optional[str]  # Comma-separated values
-
+    
     patient: Patient = Relationship(back_populates="day_records")
     possible_reason: PossibleReason = Relationship()
     event_at_alert: Event = Relationship()
@@ -73,6 +73,7 @@ class ModelLog(SQLModel, table=True):
     raw_content: str
     date: date
     time: time
+    ack: bool = Field(default=False)
     
     patient: Patient = Relationship(back_populates="model_log")
     

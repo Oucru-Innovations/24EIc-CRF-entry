@@ -30,9 +30,9 @@ def get_patient(patient_id: int, db: Session = Depends(get_session)):
 
 # Get a Single Patient by Study Code
 @router.get("/get_patient_by_study_code/{study_code}", response_model=Patient)
-def get_patient(study_code: int, db: Session = Depends(get_session)):
+def get_patient(study_code: str, db: Session = Depends(get_session)):
     # patient = crud.get_patient_by_id(db=db, patient_id=patient_id)
-    patient = crud.get_patient_by_study_code(db=db, study_code=study_code)
+    patient = crud.get_patient_by_study_code(db=db, patient_code=study_code)
     if not patient:
         return JSONResponse(
             status_code=404,

@@ -40,8 +40,21 @@ function DayRecordForm({ patientId, recordData, onSave }) {
       .then((response) => setEvents(response.data))
       .catch((error) => console.error('Error fetching events:', error));
 
+    // if (recordData) {
+    //   setFormData(recordData); // Pre-fill the form if editing a day record
+    // }
     if (recordData) {
-      setFormData(recordData); // Pre-fill the form if editing a day record
+      if (recordData.isNewRecord) {
+        // This is a new record with pre-filled data
+        setFormData(prevState => ({
+          ...prevState,
+          date_of_alert: recordData.date_of_alert,
+          time_of_alert: recordData.time_of_alert,
+        }));
+      } else {
+        // This is an existing record being edited
+        setFormData(recordData);
+      }
     }
   }, [patientId, recordData]);
 
@@ -56,10 +69,14 @@ function DayRecordForm({ patientId, recordData, onSave }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const method = recordData ? api.put : api.post;
-      const url = recordData ? `patient-day-records/${recordData.id}` : 'patient-day-records/';
+      // const method = recordData ? api.put : api.post;
+      // const url = recordData ? `patient-day-records/${recordData.id}` : 'patient-day-records/';
+          // Check if this is an existing record (not from log selection)
+    const isExistingRecord = recordData && !recordData.isNewRecord;
+    const method = isExistingRecord ? api.put : api.post;
+    const url = isExistingRecord ? `patient-day-records/${recordData.id}` : 'patient-day-records/';
+
       const response = await method(url, { ...formData, patient_id: patientId });
-  
       // Call onSave with the updated/new record
       onSave(response.data);
   

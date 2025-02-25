@@ -10,6 +10,13 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  ListItemText,
+  Typography,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'; // Import back icon
 import DayRecordForm from '../components/DayRecordForm'; // Import the DayRecordForm component
@@ -22,6 +29,9 @@ function PatientPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentRecord, setCurrentRecord] = useState(null);
 
+  const [modelLogs, setModelLogs] = useState([]);
+  const [selectedLog, setSelectedLog] = useState('');
+
   useEffect(() => {
     // Fetch patient details
     api.get(`patients/${patientId}`)
@@ -30,6 +40,9 @@ function PatientPage() {
 
     // Fetch patient's day records
     fetchDayRecords();
+
+    // Fetch model logs
+    fetchModelLogs();
   }, [patientId]);
 
   const fetchDayRecords = () => {
@@ -49,6 +62,12 @@ function PatientPage() {
           console.error('No records found for this patient');
         }
       });
+  };
+
+  const fetchModelLogs = () => {
+    api.get(`logs/model_log/${patientId}`)
+      .then((response) => setModelLogs(response.data))
+      .catch((error) => console.error('Error fetching model logs:', error));
   };
 
   const handleDialogOpen = (record = null) => {
@@ -78,11 +97,28 @@ function PatientPage() {
     const payload = isNew ? { ...record, patient_id: patientId } : record;
 
     method(url, payload)
-      .then((response) => {
-        fetchDayRecords(); // Refetch the records after saving
-        handleDialogClose();
-      })
-      .catch((error) => console.error('Error saving day record:', error));
+    .then((response) => {
+      fetchDayRecords(); // Refetch the records after saving
+      
+      // If this was created from a log, update the log's ack status
+      if (selectedLog) {
+        api.put(`logs/model_log/${selectedLog}`, { ack: true })
+          .then(() => {
+            fetchModelLogs(); // Refetch logs to update the dropdown
+            setSelectedLog(''); // Reset the selected log
+          })
+          .catch((error) => console.error('Error updating log status:', error));
+      }
+      
+      handleDialogClose();
+    })
+    .catch((error) => console.error('Error saving day record:', error));
+    // method(url, payload)
+    //   .then((response) => {
+    //     fetchDayRecords(); // Refetch the records after saving
+    //     handleDialogClose();
+    //   })
+    //   .catch((error) => console.error('Error saving day record:', error));
   };
 
   const handleDeleteRecord = (recordId) => {
@@ -93,6 +129,22 @@ function PatientPage() {
         );
       })
       .catch((error) => console.error('Error deleting day record:', error));
+  };
+
+  const handleLogChange = (event) => {
+    const selectedLogId = event.target.value;
+    setSelectedLog(selectedLogId);
+    const selectedLogDetail = modelLogs.find(log => log.id === selectedLogId);
+    
+    // Create initial form data with the log date and time
+    const initialFormData = {
+      isNewRecord: true, 
+      date_of_alert: selectedLogDetail.date,
+      time_of_alert: selectedLogDetail.time,
+    };
+    
+    // Pass the initial form data when opening the dialog
+    handleDialogOpen(initialFormData);
   };
 
   const columns = [
@@ -190,6 +242,24 @@ function PatientPage() {
           <p>
             <strong>Gender:</strong> {patient.gender}
           </p>
+
+          <FormControl fullWidth variant="outlined" sx={{ mb: 2 , width: '300px'}}>
+            <InputLabel id="ignored-alert-list-label">Ignored Alert List</InputLabel>
+            <Select
+              labelId="ignored-alert-list-label"
+              id="ignored-alert-list"
+              value={selectedLog}
+              onChange={handleLogChange}
+              label="Ignored Alert List"
+              MenuProps={{ PaperProps: { style: { maxHeight: 300, width: 300 } } }}
+            >
+              {modelLogs.filter(log => !log.ack).map((log) => ( 
+                <MenuItem key={log.id} value={log.id}>
+                  {log.date} {log.time}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
           <Box mt={4} style={{ height: 400, width: '100%' }}>
             <DataGrid
