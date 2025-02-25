@@ -182,7 +182,7 @@ function PatientPage() {
     { field: 'assessment_datetime', headerName: 'Assessment Time', width: 200, headerClassName: styles.dataGridHeader },
     { field: 'new_information', headerName: 'New Information', width: 350, headerClassName: styles.dataGridHeader },
     { field: 'expected_alert', headerName: 'Expected Alert', width: 350, headerClassName: styles.dataGridHeader },
-    // { field: 'event_during_24_hours', headerName: 'Event During 24 Hours', width: 300, headerClassName: styles.dataGridHeader },
+    { field: 'event_during_24_hours', headerName: 'Alert content', width: 300, headerClassName: styles.dataGridHeader },
   ];
   
   // const columns = [

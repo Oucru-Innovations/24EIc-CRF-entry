@@ -166,7 +166,7 @@ function DayRecordForm({ patientId, recordData, onSave }) {
           <TextField
             fullWidth
             select
-            label="Possible Reason of Alert"
+            label="Reason of Alert"
             name="possible_reason_id"
             value={formData.possible_reason_id}
             onChange={handleChange}
@@ -179,7 +179,7 @@ function DayRecordForm({ patientId, recordData, onSave }) {
             ))}
           </TextField>
         </Grid>
-        <Grid item xs={12} sm={6}>
+        {/* <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
             label="New Information (0-7)"
@@ -191,10 +191,11 @@ function DayRecordForm({ patientId, recordData, onSave }) {
             // required
           />
         </Grid>
+         */}
         <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
-            label="Expected Alert (0-7)"
+            label="Assessment of current Ablett"
             type="number"
             name="expected_alert"
             value={formData.expected_alert}
@@ -203,7 +204,7 @@ function DayRecordForm({ patientId, recordData, onSave }) {
             // required
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        {/* <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
             select
@@ -219,11 +220,11 @@ function DayRecordForm({ patientId, recordData, onSave }) {
               </MenuItem>
             ))}
           </TextField>
-        </Grid>
+        </Grid> */}
         <Grid item xs={12}>
           <TextField
             fullWidth
-            label="Event During 24 Hours"
+            label="Alert content"
             name="event_during_24_hours"
             value={formData.event_during_24_hours}
             onChange={handleChange}
