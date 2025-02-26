@@ -48,7 +48,7 @@ function PatientPage() {
   }, [patientId]);
 
   const fetchPossibleReasons = () => {
-    api.get(`possible-reasons/`) // Adjust the endpoint if needed
+    api.get(`options/possible-reasons/`) // Adjust the endpoint if needed
       .then((response) => {
         const reasonMap = response.data.reduce((acc, reason) => {
           acc[reason.id] = reason.reason; // Store { id: reasonText }
