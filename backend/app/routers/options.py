@@ -15,7 +15,7 @@ def create_possible_reason(reason: PossibleReason, db: Session = Depends(get_ses
 
 # Get All PossibleReasons
 @router.get("/possible-reasons/", response_model=list[PossibleReason])
-def get_possible_reasons(skip: int = 0, limit: int = 100, db: Session = Depends(get_session)):
+def get_possible_reasons(skip: int = 0, limit: int = None, db: Session = Depends(get_session)):
     return crud.get_possible_reasons(db=db, skip=skip, limit=limit)
 
 # Get a Single PossibleReason by ID
@@ -54,7 +54,7 @@ def create_event(event: Event, db: Session = Depends(get_session)):
 
 # Get All Events
 @router.get("/events/", response_model=list[Event])
-def get_events(skip: int = 0, limit: int = 100, db: Session = Depends(get_session)):
+def get_events(skip: int = 0, limit: int = None, db: Session = Depends(get_session)):
     return crud.get_events(db=db, skip=skip, limit=limit)
 
 # Get a Single Event by ID

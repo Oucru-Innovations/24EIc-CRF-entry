@@ -4,6 +4,7 @@ from backend.app.database import get_session
 from backend.app.models import ModelLog, PipelineLog, SystemLog
 import backend.app.crud as crud
 from datetime import datetime
+# from typing import Optional
 
 router = APIRouter()
 
@@ -14,7 +15,7 @@ def create_model_log(log: ModelLog, db: Session = Depends(get_session)):
     return crud.create_model_log(db=db, log=log)
 
 @router.get("/model_log/{patient_id}", response_model=list[ModelLog])
-def get_model_logs(patient_id: int, skip: int = 0, limit: int| None = None, db: Session = Depends(get_session)):
+def get_model_logs(patient_id: int, skip: int = 0, limit: int = None, db: Session = Depends(get_session)):
     return crud.get_model_logs(db=db, patient_id=patient_id, skip=skip, limit=limit)
 
 @router.get("/model_log/by_id/{log_id}", response_model=ModelLog)
@@ -45,7 +46,7 @@ def create_pipeline_log(log: PipelineLog, db: Session = Depends(get_session)):
     return crud.create_pipeline_log(db=db, log=log)
 
 @router.get("/pipeline_log/{patient_id}", response_model=list[PipelineLog])
-def get_pipeline_logs(patient_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_session)):
+def get_pipeline_logs(patient_id: int, skip: int = 0, limit: Optional[int] = None, db: Session = Depends(get_session)):
     return crud.get_pipeline_logs(db=db, patient_id=patient_id, skip=skip, limit=limit)
 
 @router.get("/pipeline_log/by_id/{log_id}", response_model=PipelineLog)

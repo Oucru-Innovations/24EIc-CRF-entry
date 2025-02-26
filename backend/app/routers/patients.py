@@ -17,7 +17,7 @@ def create_patient(patient: Patient, db: Session = Depends(get_session)):
 
 # Get All Patients
 @router.get("/", response_model=list[Patient])
-def get_patients(skip: int = 0, limit: int = 100, db: Session = Depends(get_session)):
+def get_patients(skip: int = 0, limit: int = None, db: Session = Depends(get_session)):
     return crud.get_patients(db=db, skip=skip, limit=limit)
 
 # Get a Single Patient by ID

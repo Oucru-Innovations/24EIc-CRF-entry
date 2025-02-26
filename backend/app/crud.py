@@ -4,7 +4,7 @@ from backend.app.models import (
     Event, ModelLog, PipelineLog, SystemLog
 )
 from datetime import datetime,date,time
-from sqlalchemy import desc
+from sqlalchemy import desc, asc
 
 # --- Patient CRUD Operations ---
 
@@ -14,9 +14,15 @@ def create_patient(db: Session, patient: Patient):
     db.refresh(patient)
     return patient
 
-def get_patients(db: Session, skip: int = 0, limit: int = 100):
-    statement = select(Patient).offset(skip).limit(limit)
-    return db.exec(statement).all()
+def get_patients(db: Session, skip: int = 0, limit: int | None = None):
+    query = db.query(Patient)
+    # Apply offset
+    query = query.offset(skip)
+    # Apply limit only if provided
+    if limit is not None:
+        query = query.limit(limit)
+    return query.all()
+
 
 def get_patient_by_id(db: Session, patient_id: int):
     return db.get(Patient, patient_id)
@@ -74,9 +80,14 @@ def create_patient_day_record(db: Session, record: PatientDayRecord):
     return record
 
 # Get all PatientDayRecords for a specific patient
-def get_patient_day_records(db: Session, patient_id: int, skip: int = 0, limit: int = 100):
-    statement = select(PatientDayRecord).where(PatientDayRecord.patient_id == patient_id).offset(skip).limit(limit)
-    return db.exec(statement).all()
+def get_patient_day_records(db: Session, patient_id: int, skip: int = 0, limit: int | None = None):
+    query = db.query(PatientDayRecord).filter(PatientDayRecord.patient_id == patient_id)
+    # Apply offset
+    query = query.offset(skip)
+    # Apply limit only if provided
+    if limit is not None:
+        query = query.limit(limit)
+    return query.all()
 
 # Get a single PatientDayRecord by ID
 def get_patient_day_record_by_id(db: Session, record_id: int):
@@ -120,9 +131,14 @@ def create_possible_reason(db: Session, reason: PossibleReason):
     return reason
 
 # Get all PossibleReasons
-def get_possible_reasons(db: Session, skip: int = 0, limit: int = 100):
-    statement = select(PossibleReason).offset(skip).limit(limit)
-    return db.exec(statement).all()
+def get_possible_reasons(db: Session, skip: int = 0, limit: int = None):
+    query = db.query(PossibleReason)
+    # Apply offset
+    query = query.offset(skip)
+    # Apply limit only if provided
+    if limit is not None:
+        query = query.limit(limit)
+    return query.all()
 
 # Get a single PossibleReason by ID
 def get_possible_reason_by_id(db: Session, reason_id: int):
@@ -159,9 +175,15 @@ def create_event(db: Session, event: Event):
     return event
 
 # Get all Events
-def get_events(db: Session, skip: int = 0, limit: int = 100):
-    statement = select(Event).offset(skip).limit(limit)
-    return db.exec(statement).all()
+def get_events(db: Session, skip: int = 0, limit: int = None):
+    query = db.query(Event)
+    # Apply offset
+    query = query.offset(skip)
+    # Apply limit only if provided
+    if limit is not None:
+        query = query.limit(limit)
+    return query.all()
+
 
 # Get a single Event by ID
 def get_event_by_id(db: Session, event_id: int):
@@ -246,9 +268,14 @@ def create_pipeline_log(db: Session, log: PipelineLog):
     return log
 
 
-def get_pipeline_logs(db: Session, patient_id: int, skip: int = 0, limit: int = 100):
-    statement = select(PipelineLog).where(PipelineLog.patient_id == patient_id).offset(skip).limit(limit)
-    return db.exec(statement).all()
+def get_pipeline_logs(db: Session, patient_id: int, skip: int = 0, limit: int = None):
+    query = db.query(PipelineLog).filter(PipelineLog.patient_id == patient_id)
+    # Apply offset
+    query = query.offset(skip)
+    # Apply limit only if provided
+    if limit is not None:
+        query = query.limit(limit)
+    return query.all()
 
 
 def get_pipeline_log_by_id(db: Session, log_id: int):
@@ -296,10 +323,23 @@ def create_system_log(log: SystemLog, db: Session):
     return new_log.dict()
 
 
-def get_system_logs(db: Session, skip: int = 0, limit: int = 100, order_by: str = "asc"):
-    statement = select(SystemLog).order_by(SystemLog.change_email_mode_timestamp.desc() 
-                        if order_by == "desc" else SystemLog.change_email_mode_timestamp.asc()).offset(skip).limit(limit)
-    return db.exec(statement).all()
+def get_system_logs(db: Session, skip: int = 0, limit: int = None, order_by: str = "asc"):
+    query = db.query(SystemLog)
+
+    # Apply ordering
+    if order_by == "desc":
+        query = query.order_by(desc(SystemLog.change_email_mode_timestamp))
+    else:
+        query = query.order_by(asc(SystemLog.change_email_mode_timestamp))
+
+    # Apply offset
+    query = query.offset(skip)
+
+    # Apply limit only if provided
+    if limit is not None:
+        query = query.limit(limit)
+
+    return query.all()
 
 
 

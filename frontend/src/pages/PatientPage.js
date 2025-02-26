@@ -262,29 +262,31 @@ function PatientPage() {
             </Select>
           </FormControl>
 
-          <Box mt={4} style={{ height: 400, width: '100%' }}>
-            <DataGrid
-              rows={dayRecords}
-              columns={columns}
-              getRowId={(row) => row.id}
-              pageSize={5}
-              rowsPerPageOptions={[5]}
-              autoHeight
-              disableSelectionOnClick
-              slots={{ toolbar: GridToolbar }}
-            />
-          </Box>
-          <Box sx={{ position: 'sticky', bottom: 20, background: 'white', 
-            p: 2, textAlign: 'center' }}>
-            <Button
-              id="add-record-button"
-              variant="contained"
-              color="secondary"
-              onClick={() => handleDialogOpen()}
-              style={{ marginTop: '20px' }}
-            >
-              Add Observation
-            </Button>
+          <Box mt={4} sx={{ height: 'auto', width: '100%', position: 'relative' }}>
+            <Box sx={{ flexGrow: 1, overflow: 'auto', pb: 8 }}>
+              <DataGrid
+                rows={dayRecords}
+                columns={columns}
+                getRowId={(row) => row.id}
+                pageSize={5}
+                rowsPerPageOptions={[5]}
+                autoHeight
+                disableSelectionOnClick
+                slots={{ toolbar: GridToolbar }}
+              />
+            </Box>
+
+            {/* Sticky Button */}
+            <Box sx={{ position: 'sticky', bottom: 20, background: 'white', p: 2, textAlign: 'center' }}>
+              <Button
+                id="add-record-button"
+                variant="contained"
+                color="secondary"
+                onClick={() => handleDialogOpen()}
+              >
+                Add Observation
+              </Button>
+            </Box>
           </Box>
           <Dialog open={isDialogOpen} onClose={handleDialogClose} maxWidth="sm" fullWidth>
             <DialogTitle>{currentRecord ? 'Edit Record' : 'Add New Record'}</DialogTitle>
