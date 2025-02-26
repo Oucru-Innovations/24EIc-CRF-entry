@@ -40,12 +40,18 @@ function PatientPage() {
       .then((response) => setPatient(response.data))
       .catch((error) => console.error('Error fetching patient details:', error));
 
-    // Fetch patient's day records
-    fetchDayRecords();
     fetchPossibleReasons(); // Fetch possible reasons once
+    // // Fetch patient's day records
+    // fetchDayRecords();
     // Fetch model logs
     fetchModelLogs();
   }, [patientId]);
+
+  useEffect(() => {
+    if (Object.keys(possibleReasons).length > 0) {
+      fetchDayRecords(); // Fetch day records only after possibleReasons is set
+    }
+  }, [possibleReasons]); // Runs when possibleReasons updates
 
   const fetchPossibleReasons = () => {
     api.get(`options/possible-reasons/`) // Adjust the endpoint if needed
