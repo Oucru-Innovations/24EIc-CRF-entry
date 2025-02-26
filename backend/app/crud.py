@@ -4,6 +4,7 @@ from backend.app.models import (
     Event, ModelLog, PipelineLog, SystemLog
 )
 from datetime import datetime,date,time
+from sqlalchemy import desc
 
 # --- Patient CRUD Operations ---
 
@@ -202,9 +203,14 @@ def create_model_log(db: Session, log: ModelLog):
     return log
 
 
-def get_model_logs(db: Session, patient_id: int, skip: int = 0, limit: int = 100):
-    statement = select(ModelLog).where(ModelLog.patient_id == patient_id).offset(skip).limit(limit)
-    return db.exec(statement).all()
+
+def get_model_logs(db: Session, patient_id: int, skip: int = 0, limit: int = None):
+    query = db.query(ModelLog).filter(ModelLog.patient_id == patient_id).order_by(desc(ModelLog.date), desc(ModelLog.time))
+
+    if limit:  # Apply limit only if it's provided
+        query = query.limit(limit)
+
+    return query.offset(skip).all()
 
 
 def get_model_log_by_id(db: Session, log_id: int):
