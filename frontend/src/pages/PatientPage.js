@@ -66,7 +66,7 @@ function PatientPage() {
 
   const fetchModelLogs = () => {
     api.get(`logs/model_log/${patientId}`)
-      .then((response) => setModelLogs(response.data))
+      .then((response) => setModelLogs([...response.data])) // Update to force new reference
       .catch((error) => console.error('Error fetching model logs:', error));
   };
 
@@ -182,7 +182,8 @@ function PatientPage() {
     { field: 'assessment_datetime', headerName: 'Assessment Time', width: 200, headerClassName: styles.dataGridHeader },
     { field: 'new_information', headerName: 'New Information', width: 350, headerClassName: styles.dataGridHeader },
     { field: 'expected_alert', headerName: 'Expected Alert', width: 350, headerClassName: styles.dataGridHeader },
-    { field: 'event_during_24_hours', headerName: 'Alert content', width: 300, headerClassName: styles.dataGridHeader },
+    // { field: 'event_during_24_hours', headerName: 'Alert content', width: 300, headerClassName: styles.dataGridHeader },
+    { field: 'notes', headerName: 'Notes', width: 300, headerClassName: styles.dataGridHeader },
   ];
   
   // const columns = [
@@ -273,16 +274,18 @@ function PatientPage() {
               slots={{ toolbar: GridToolbar }}
             />
           </Box>
-          <Button
-            id="add-record-button"
-            variant="contained"
-            color="secondary"
-            onClick={() => handleDialogOpen()}
-            style={{ marginTop: '20px' }}
-          >
-            Add Observation
-          </Button>
-
+          <Box sx={{ position: 'sticky', bottom: 20, background: 'white', 
+            p: 2, textAlign: 'center' }}>
+            <Button
+              id="add-record-button"
+              variant="contained"
+              color="secondary"
+              onClick={() => handleDialogOpen()}
+              style={{ marginTop: '20px' }}
+            >
+              Add Observation
+            </Button>
+          </Box>
           <Dialog open={isDialogOpen} onClose={handleDialogClose} maxWidth="sm" fullWidth>
             <DialogTitle>{currentRecord ? 'Edit Record' : 'Add New Record'}</DialogTitle>
             <DialogContent>

@@ -60,6 +60,7 @@ class PatientDayRecord(SQLModel, table=True):
     expected_alert: Optional[int] = None  # Scale 0-7
     event_at_alert_id: Optional[int] = Field(default=None, foreign_key="events.id")  # Reference to events table
     event_during_24_hours: Optional[str]  # Comma-separated values
+    notes: Optional[str] = None
     
     patient: Patient = Relationship(back_populates="day_records")
     possible_reason: PossibleReason = Relationship()

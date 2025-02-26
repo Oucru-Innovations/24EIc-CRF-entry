@@ -221,12 +221,22 @@ function DayRecordForm({ patientId, recordData, onSave }) {
             ))}
           </TextField>
         </Grid> */}
-        <Grid item xs={12}>
+        {/* <Grid item xs={12}>
           <TextField
             fullWidth
             label="Alert content"
             name="event_during_24_hours"
             value={formData.event_during_24_hours}
+            onChange={handleChange}
+            placeholder="Comma-separated values"
+          />
+        </Grid> */}
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="Notes"
+            name="notes"
+            value={formData.notes}
             onChange={handleChange}
             placeholder="Comma-separated values"
           />
