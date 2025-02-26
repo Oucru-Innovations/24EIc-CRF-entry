@@ -31,6 +31,8 @@ function PatientPage() {
 
   const [modelLogs, setModelLogs] = useState([]);
   const [selectedLog, setSelectedLog] = useState('');
+  const [possibleReasons, setPossibleReasons] = useState({});
+
 
   useEffect(() => {
     // Fetch patient details
@@ -40,10 +42,22 @@ function PatientPage() {
 
     // Fetch patient's day records
     fetchDayRecords();
-
+    fetchPossibleReasons(); // Fetch possible reasons once
     // Fetch model logs
     fetchModelLogs();
   }, [patientId]);
+
+  const fetchPossibleReasons = () => {
+    api.get(`possible-reasons/`) // Adjust the endpoint if needed
+      .then((response) => {
+        const reasonMap = response.data.reduce((acc, reason) => {
+          acc[reason.id] = reason.reason; // Store { id: reasonText }
+          return acc;
+        }, {});
+        setPossibleReasons(reasonMap);
+      })
+      .catch((error) => console.error('Error fetching possible reasons:', error));
+  };
 
   const fetchDayRecords = () => {
     api.get(`patient-day-records/?patient_id=${patientId}`)
@@ -53,6 +67,7 @@ function PatientPage() {
           ...record,
           alert_datetime: `${record.date_of_alert} ${record.time_of_alert}`,
           assessment_datetime: `${record.date_of_assessment} ${record.time_of_assessment}`,
+          reason: possibleReasons[record.possible_reason_id] || "Unknown",
         }));
         setDayRecords(transformedData);
       })
@@ -180,7 +195,8 @@ function PatientPage() {
     // { field: 'time_of_assessment', headerName: 'Time of Assessment', width: 100, headerClassName: styles.dataGridHeader },
     { field: 'alert_datetime', headerName: 'Alert Time', width: 200, headerClassName: styles.dataGridHeader },
     { field: 'assessment_datetime', headerName: 'Assessment Time', width: 200, headerClassName: styles.dataGridHeader },
-    { field: 'new_information', headerName: 'New Information', width: 350, headerClassName: styles.dataGridHeader },
+    // { field: 'new_information', headerName: 'New Information', width: 350, headerClassName: styles.dataGridHeader },
+    { field: 'reason', headerName: 'Reason of Alert', width: 350, headerClassName: styles.dataGridHeader },
     { field: 'expected_alert', headerName: 'Expected Alert', width: 350, headerClassName: styles.dataGridHeader },
     // { field: 'event_during_24_hours', headerName: 'Alert content', width: 300, headerClassName: styles.dataGridHeader },
     { field: 'notes', headerName: 'Notes', width: 300, headerClassName: styles.dataGridHeader },
