@@ -16,6 +16,7 @@ function HomePage() {
   useEffect(() => {
     fetchPatients();
     fetchEmailMode();
+    checkModelStatus();
   }, []);
 
   const fetchPatients = () => {
@@ -26,6 +27,22 @@ function HomePage() {
       .catch((error) => {
         console.error('Error fetching patients:', error);
       });
+  };
+
+  // Check model status from backend
+  const checkModelStatus = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/status');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setModelStatus(data.running);
+    } catch (error) {
+      console.error('Error checking model status:', error);
+      setModelStatus(false); // Default to false if there's an error
+    }
   };
 
   // Fetch the current email mode from SystemLog API
