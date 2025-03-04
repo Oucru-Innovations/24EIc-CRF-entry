@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Button, Box, IconButton, Switch, FormControlLabel } from '@mui/material';
+import { Button, Box, IconButton, Switch, FormControlLabel, CircularProgress } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { Edit, Delete } from '@mui/icons-material';
 import PatientForm from '../components/PatientForm';
@@ -12,11 +12,19 @@ function HomePage() {
   const [editingPatient, setEditingPatient] = useState(null);
   const [emailMode, setEmailMode] = useState(false);
   const [modelStatus, setModelStatus] = useState(false);
+  const [isModelLoading, setIsModelLoading] = useState(false);
+  const [targetStatus, setTargetStatus] = useState(null);
 
   useEffect(() => {
     fetchPatients();
     fetchEmailMode();
     checkModelStatus();
+
+      // Set up polling interval for model status
+    const statusInterval = setInterval(checkModelStatus, 10000); // Check every 10 seconds
+
+    // Cleanup interval on unmount
+    return () => clearInterval(statusInterval);
   }, []);
 
   const fetchPatients = () => {
@@ -32,17 +40,35 @@ function HomePage() {
   // Check model status from backend
   const checkModelStatus = async () => {
     try {
-      const response = await fetch('http://localhost:5000/status');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const response = await api.get('model/status');
+      if (response.data) {
+        const currentStatus = response.data.running;
+        setModelStatus(currentStatus);
+
+        // Clear loading state if target status is reached or cleared
+        if (targetStatus === null || currentStatus === targetStatus) {
+          setTargetStatus(null);
+          setIsModelLoading(false);
+        }
       }
-      
-      const data = await response.json();
-      setModelStatus(data.running);
     } catch (error) {
       console.error('Error checking model status:', error);
-      setModelStatus(false); // Default to false if there's an error
+      setModelStatus(false);
+      setTargetStatus(null);
+      setIsModelLoading(false);
     }
+    // try {
+    //   const response = await fetch('http://localhost:5000/status');
+    //   if (!response.ok) {
+    //     throw new Error(`HTTP error! status: ${response.status}`);
+    //   }
+      
+    //   const data = await response.json();
+    //   setModelStatus(data.running);
+    // } catch (error) {
+    //   console.error('Error checking model status:', error);
+    //   setModelStatus(false); // Default to false if there's an error
+    // }
   };
 
   // Fetch the current email mode from SystemLog API
@@ -60,12 +86,16 @@ function HomePage() {
 
   // Toggle model status
   const handleToggleModel = async () => {
-    const newStatus = !modelStatus;
-    setModelStatus(newStatus); // Optimistic UI update
+    // const newStatus = !modelStatus;
+    // setModelStatus(newStatus); // Optimistic UI update
+    const target = !modelStatus;
+    setTargetStatus(target);
+    setIsModelLoading(true);
 
     try {
-      const endpoint = newStatus ? '/start' : '/stop';
-      const response = await fetch(`http://localhost:5000${endpoint}`, {
+      // const endpoint = newStatus ? '/start' : '/stop';
+      const endpoint = target ? '/start' : '/stop';
+      const response = await fetch(`http://localhost:5001${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,11 +106,13 @@ function HomePage() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      console.log(`Model ${newStatus ? 'started' : 'stopped'} successfully`);
+      // console.log(`Model ${newStatus ? 'started' : 'stopped'} successfully`);
+      console.log(`Model ${target ? 'start' : 'stop'} command sent successfully`);
     } catch (error) {
       console.error('Error toggling model:', error);
-      setModelStatus(!newStatus); // Revert UI on failure
-      // You might want to show an error message to the user here
+      setTargetStatus(null);
+      setIsModelLoading(false);
+      // setModelStatus(!newStatus); // Revert UI on failure
     }
   };
 
@@ -236,7 +268,7 @@ function HomePage() {
           }
           label={`Alert Mode: ${emailMode ? 'ON' : 'OFF'}`}
         />
-                <FormControlLabel
+        {/* <FormControlLabel
           control={
             <Switch
               checked={modelStatus}
@@ -245,7 +277,40 @@ function HomePage() {
             />
           }
           label={`Model Status: ${modelStatus ? 'ON' : 'OFF'}`}
-        />
+        /> */}
+        <Box display="flex" alignItems="center" gap={2}>
+          <Button
+            variant="contained"
+            onClick={handleToggleModel}
+            disabled={isModelLoading}
+            color={modelStatus ? "error" : "primary"}
+          >
+            {isModelLoading ? (
+              <>
+                <CircularProgress size={24} color="inherit" />
+                <Box component="span" ml={1}>
+                  {targetStatus ? "Starting..." : "Stopping..."}
+                </Box>
+              </>           
+            ) : (
+              modelStatus ? "Stop Model" : "Start Model"
+            )}
+          </Button>
+          <Box
+            width={24}
+            height={24}
+            borderRadius="50%"
+            bgcolor={modelStatus ? "#4caf50" : "#f44336"}
+            border={1}
+            borderColor="grey.300"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+          />
+          <Box component="span" color={modelStatus ? "success.main" : "error.main"}>
+            {modelStatus ? "Running" : "Stopped"}
+          </Box>
+        </Box>
       </Box>
       
       <div style={{ height: 400, width: '100%' }}>

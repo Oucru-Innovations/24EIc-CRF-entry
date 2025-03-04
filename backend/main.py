@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from backend.app.database import engine
 from backend.app.models import SQLModel
-from backend.app.routers import patients, options, patient_day_records, logs
+from backend.app.routers import patients, options, patient_day_records, logs, model_status
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -42,6 +42,8 @@ app.include_router(patients.router, prefix="/api/patients", tags=["patients"])
 app.include_router(logs.router, prefix="/api/logs", tags=["logs"])
 app.include_router(patient_day_records.router, prefix="/api/patient-day-records", tags=["patient-day-records"])
 app.include_router(options.router, prefix="/api/options", tags=["options"])
+
+app.include_router(model_status.router, prefix="/api/model", tags=["model"])
 
 # Root endpoint
 @app.get("/")
