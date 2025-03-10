@@ -262,6 +262,10 @@ def delete_model_log(db: Session, log_id: int):
 # --- PipelineLog CRUD Operations ---
 
 def create_pipeline_log(db: Session, log: PipelineLog):
+    if isinstance(log.date, str):
+        log.date = date.fromisoformat(log.date)
+    if isinstance(log.time, str):
+        log.time = time.fromisoformat(log.time)
     db.add(log)
     db.commit()
     db.refresh(log)

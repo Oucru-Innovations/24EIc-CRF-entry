@@ -153,20 +153,36 @@ function PatientPage() {
   };
 
   const handleLogChange = (event) => {
-    const selectedLogId = event.target.value;
-    setSelectedLog(selectedLogId);
-    const selectedLogDetail = modelLogs.find(log => log.id === selectedLogId);
+    const selectedRecordId = event.target.value;
+    setSelectedLog(selectedRecordId);
+    const selectedRecord = dayRecords.find(record => record.id === selectedRecordId);
     
-    // Create initial form data with the log date and time
-    const initialFormData = {
-      isNewRecord: true, 
-      date_of_alert: selectedLogDetail.date,
-      time_of_alert: selectedLogDetail.time,
-    };
-    
-    // Pass the initial form data when opening the dialog
-    handleDialogOpen(initialFormData);
+    if (selectedRecord) {
+      // Create initial form data from the selected record
+      const initialFormData = {
+        ...selectedRecord,
+        isNewRecord: false // This is an existing record we're editing
+      };
+      
+      // Pass the record data when opening the dialog
+      handleDialogOpen(initialFormData);
+    }
   };
+  // const handleLogChange = (event) => {
+  //   const selectedLogId = event.target.value;
+  //   setSelectedLog(selectedLogId);
+  //   const selectedLogDetail = modelLogs.find(log => log.id === selectedLogId);
+    
+  //   // Create initial form data with the log date and time
+  //   const initialFormData = {
+  //     isNewRecord: true, 
+  //     date_of_alert: selectedLogDetail.date,
+  //     time_of_alert: selectedLogDetail.time,
+  //   };
+    
+  //   // Pass the initial form data when opening the dialog
+  //   handleDialogOpen(initialFormData);
+  // };
 
   const columns = [
     { field: 'id', headerName: 'ID', width: 50, headerClassName: 'data-grid-header' },
@@ -204,10 +220,22 @@ function PatientPage() {
     // { field: 'new_information', headerName: 'New Information', width: 350, headerClassName: styles.dataGridHeader },
     { field: 'reason', headerName: 'Reason of Alert', width: 350, headerClassName: styles.dataGridHeader },
     { field: 'expected_alert', headerName: 'Expected Alert', width: 350, headerClassName: styles.dataGridHeader },
-    // { field: 'event_during_24_hours', headerName: 'Alert content', width: 300, headerClassName: styles.dataGridHeader },
+    { field: 'event_during_24_hours', headerName: 'Alert content', width: 300, headerClassName: styles.dataGridHeader },
     { field: 'notes', headerName: 'Notes', width: 300, headerClassName: styles.dataGridHeader },
   ];
   
+  const filteredDayRecords = dayRecords.filter(record => 
+    record.expected_alert && 
+    record.expected_alert !== '0' && 
+    record.expected_alert !== 0
+  );
+
+  // Create a filtered list for records with expected_alert = 0
+  const ignoredAlerts = dayRecords.filter(record => 
+    !record.expected_alert || 
+    record.expected_alert === '0' || 
+    record.expected_alert === 0
+  );
   // const columns = [
   //   { field: 'id', headerName: 'ID', width: 50 },
   //   {
@@ -276,18 +304,25 @@ function PatientPage() {
               label="Ignored Alert List"
               MenuProps={{ PaperProps: { style: { maxHeight: 300, width: 300 } } }}
             >
-              {modelLogs.filter(log => !log.ack).map((log) => ( 
+              {ignoredAlerts.map((record) => (
+                <MenuItem key={record.id} value={record.id}>
+                  {record.alert_datetime}
+                </MenuItem>
+              ))}
+              {/* {modelLogs.filter(log => !log.ack).map((log) => ( 
                 <MenuItem key={log.id} value={log.id}>
                   {log.date} {log.time}
                 </MenuItem>
-              ))}
+              ))} */}
             </Select>
           </FormControl>
-
+          
+          
           <Box mt={4} sx={{ height: 'auto', width: '100%', position: 'relative' }}>
             <Box sx={{ flexGrow: 1, overflow: 'auto', pb: 8 }}>
               <DataGrid
-                rows={dayRecords}
+                // rows={dayRecords}
+                rows={filteredDayRecords}
                 columns={columns}
                 getRowId={(row) => row.id}
                 pageSize={5}

@@ -53,8 +53,8 @@ class PatientDayRecord(SQLModel, table=True):
     patient_id: int = Field(foreign_key="patients.id")  # Reference to patients table
     date_of_alert: Optional[str] = None
     time_of_alert: Optional[str] = None
-    date_of_assessment: Optional[str] = None
-    time_of_assessment: Optional[str] = None
+    date_of_assessment: Optional[str] = Field(default=None)
+    time_of_assessment: Optional[str] = Field(default=None)
     possible_reason_id: Optional[int] = Field(default=None, foreign_key="possible_reasons.id")  # Reference to possible_reasons table
     new_information: Optional[int] = None  # Scale 0-7
     expected_alert: Optional[int] = None  # Scale 0-7
@@ -102,6 +102,18 @@ class PipelineLog(SQLModel, table=True):
     # email_mode: bool
     # change_email_mode_timestamp: datetime
     patient: Patient = Relationship(back_populates="pipeline_log")
+
+    @validator('date', pre=True)
+    def validate_date(cls, v):
+        if isinstance(v, str):
+            return date.fromisoformat(v)
+        return v
+        
+    @validator('time', pre=True)
+    def validate_time(cls, v):
+        if isinstance(v, str):
+            return time.fromisoformat(v)
+        return v
 
 class SystemLog(SQLModel, table=True):
     __tablename__ = "system_log"
