@@ -27,6 +27,7 @@ class Patient(SQLModel, table=True):
     # status: Enum = Enum("Active", "Inactive")
     # status_date: Optional[date] = Field(default=None)
     # Relationship to PatientDayRecord
+    summary: str = Field(default="")
     day_records: list["PatientDayRecord"] = Relationship(back_populates="patient")
     model_log: list["ModelLog"] = Relationship(back_populates="patient",sa_relationship_kwargs={"cascade": "all, delete"})
     pipeline_log: list["PipelineLog"] = Relationship(back_populates="patient",sa_relationship_kwargs={"cascade": "all, delete"})

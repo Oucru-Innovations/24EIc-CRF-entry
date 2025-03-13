@@ -28,6 +28,8 @@ function PatientPage() {
   const [dayRecords, setDayRecords] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentRecord, setCurrentRecord] = useState(null);
+  const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
+  const [recordToDelete, setRecordToDelete] = useState(null);
 
   const [modelLogs, setModelLogs] = useState([]);
   const [selectedLog, setSelectedLog] = useState('');
@@ -143,13 +145,27 @@ function PatientPage() {
   };
 
   const handleDeleteRecord = (recordId) => {
-    api.delete(`patient-day-records/${recordId}`)
-      .then(() => {
-        setDayRecords((prevRecords) =>
-          prevRecords.filter((record) => record.id !== recordId)
-        );
-      })
-      .catch((error) => console.error('Error deleting day record:', error));
+    setRecordToDelete(recordId);
+    setDeleteConfirmationOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (recordToDelete) {
+      api.delete(`patient-day-records/${recordToDelete}`)
+        .then(() => {
+          setDayRecords((prevRecords) =>
+            prevRecords.filter((record) => record.id !== recordToDelete)
+          );
+          setDeleteConfirmationOpen(false);
+          setRecordToDelete(null);
+        })
+        .catch((error) => console.error('Error deleting day record:', error));
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteConfirmationOpen(false);
+    setRecordToDelete(null);
   };
 
   const handleLogChange = (event) => {
@@ -357,6 +373,24 @@ function PatientPage() {
             <DialogActions>
               <Button onClick={handleDialogClose} color="secondary">
                 Cancel
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Delete Confirmation Dialog */}
+          <Dialog open={deleteConfirmationOpen} onClose={handleCancelDelete} maxWidth="sm" fullWidth>
+            <DialogTitle>Confirm Delete</DialogTitle>
+            <DialogContent>
+              <Typography>
+                Are you sure you want to delete this record? This action cannot be undone.
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCancelDelete} color="secondary">
+                Cancel
+              </Button>
+              <Button onClick={handleConfirmDelete} color="error" variant="contained">
+                Delete
               </Button>
             </DialogActions>
           </Dialog>

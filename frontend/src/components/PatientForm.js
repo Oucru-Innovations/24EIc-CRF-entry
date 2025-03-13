@@ -17,6 +17,7 @@ function PatientForm({ open, onClose, patientData, onSave }) {
     abbreviation_name: '',
     year_of_birth: '',
     gender: '',
+    summary: '',
     // status: 'Inactive',
   });
 
@@ -36,6 +37,7 @@ function PatientForm({ open, onClose, patientData, onSave }) {
         abbreviation_name: '',
         year_of_birth: '',
         gender: '',
+        summary: '',
         // status: 'Inactive',
       });
     }
@@ -185,6 +187,17 @@ function PatientForm({ open, onClose, patientData, onSave }) {
             <MenuItem value="Male">Male</MenuItem>
             <MenuItem value="Female">Female</MenuItem>
           </TextField>
+          <TextField
+            fullWidth
+            label="Summary"
+            name="summary"
+            value={formData.summary}
+            onChange={handleChange}
+            margin="normal"
+            multiline
+            rows={4}
+            placeholder="Enter patient summary..."
+          />
         </Box>
       </DialogContent>
       <DialogActions>

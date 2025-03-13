@@ -43,7 +43,7 @@ def update_patient(db: Session, patient_id: int, patient: Patient):
     existing_patient.year_of_birth = patient.year_of_birth
     existing_patient.gender = patient.gender
     existing_patient.status = patient.status
-    existing_patient.notes = patient.notes
+    existing_patient.summary = patient.summary
     # existing_patient.status_date = patient.status_date
 
     # Commit changes to the database
