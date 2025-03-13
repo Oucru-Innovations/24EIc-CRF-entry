@@ -234,9 +234,21 @@ function PatientPage() {
     { field: 'alert_datetime', headerName: 'Alert Time', width: 200, headerClassName: styles.dataGridHeader },
     { field: 'assessment_datetime', headerName: 'Assessment Time', width: 200, headerClassName: styles.dataGridHeader },
     // { field: 'new_information', headerName: 'New Information', width: 350, headerClassName: styles.dataGridHeader },
-    { field: 'reason', headerName: 'Reason of Alert', width: 350, headerClassName: styles.dataGridHeader },
-    { field: 'expected_alert', headerName: 'Expected Alert', width: 350, headerClassName: styles.dataGridHeader },
-    { field: 'event_during_24_hours', headerName: 'Alert content', width: 300, headerClassName: styles.dataGridHeader },
+    { field: 'reason', headerName: 'Reason of Alert', width: 300, headerClassName: styles.dataGridHeader },
+    { field: 'expected_alert', headerName: 'Expected Alert', width: 150, headerClassName: styles.dataGridHeader },
+    { field: 'event_during_24_hours', headerName: 'Alert content', width: 160, headerClassName: styles.dataGridHeader,
+      renderCell: (params) => {
+        // Extract probability value using regex
+        const content = params.value || '';
+        const match = content.match(/Probability of increase is (\d+\.\d+)%/);
+        
+        if (match && match[1]) {
+          return `Prob: ${match[1]}%`;
+        } else {
+          return content; // Return original if no match found
+        }
+      }
+     },
     { field: 'notes', headerName: 'Notes', width: 300, headerClassName: styles.dataGridHeader },
   ];
   
@@ -350,7 +362,7 @@ function PatientPage() {
             </Box>
 
             {/* Sticky Button */}
-            <Box sx={{ position: 'sticky', bottom: 20, background: 'white', p: 2, textAlign: 'center' }}>
+            {/* <Box sx={{ position: 'sticky', bottom: 20, background: 'white', p: 2, textAlign: 'center' }}>
               <Button
                 id="add-record-button"
                 variant="contained"
@@ -359,7 +371,7 @@ function PatientPage() {
               >
                 Add Observation
               </Button>
-            </Box>
+            </Box> */}
           </Box>
           <Dialog open={isDialogOpen} onClose={handleDialogClose} maxWidth="sm" fullWidth>
             <DialogTitle>{currentRecord ? 'Edit Record' : 'Add New Record'}</DialogTitle>

@@ -95,7 +95,7 @@ function HomePage() {
     try {
       // const endpoint = newStatus ? '/start' : '/stop';
       const endpoint = target ? '/start' : '/stop';
-      const response = await fetch(`http://localhost:5001${endpoint}`, {
+      const response = await fetch(`http://localhost:5000${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
